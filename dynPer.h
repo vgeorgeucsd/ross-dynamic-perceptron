@@ -11,9 +11,9 @@ typedef struct airport_message airport_message;
 
 enum airport_event_t
 {
-	ARRIVAL = 1,
-	FIRING,
-	REFRACTORY
+	ARRIVING = 1,
+	DEPARTING,
+	DROPPED
 };
 
 struct airport_state
@@ -21,33 +21,40 @@ struct airport_state
         int             id; // node id
 	double		firing_threshold; // this is the threshold for node activations
 	double		current_amplitude; // this is the current amplitude of the node
-	int		number_of_outgoing_edges; // this is the number of outoging edges
-	int		max_refractory_period; // length of the refractory periods
+	double		max_refractory_period; // length of the refractory periods
 
         tw_stime        remaining_refractory_period; // the time which remains in the nodes refractory period
 	tw_stime        last_fired_time;
 	tw_stime	last_evaluation_time;
-	float		outgoing_edge_info[][2]; // contains the gid of the outgoing edges, 
+        int             number_of_edge_parameters;
+	int		number_of_outgoing_edges; // this is the number of outoging edges
+        // tw_stime        **outgoing_edge_info;
+       	tw_stime	outgoing_edge_info[5000][3]; // contains the gid of the outgoing edges,
                                                  // the 1st dimension contains the destination lp
                                                  // the 2nd dim. contains the delay
                                                  // Need to TODO
-                                                 // the 3rd dim. contains the inhibitory or excitatory nature of the edge
-                                                 // the 4th dim. weight of the edge
+                                                 // the 4rd dim. contains the inhibitory or excitatory nature of the edge
+                                                 // the 3th dim. weight of the edge
                                                  // We would like to split the delay into the signaling speed and the distance so that we can implement STDP on the signaling speed
-
 };
 
 struct airport_message
 {
 	airport_event_t	 type;
 
-	tw_stime	 previous_evaluation_time; // This stores the last time the node was evaluated
+	tw_stime	 previous_evaluation_time; // Reverse computation, last time the node was evaluated
+        double           node_activation_amplitude; // Amplitude of the node potential at node activation
+        tw_stime        last_fired_time; // For reverse computation
+        double          edge_weight;
+        double          prev_remaining_refractory_period;
+        double          prev_current_amplitude;
+        tw_stime        prev_last_fired_time;
+        int             signal_origin;
 };
 
-static tw_stime lookahead = 0.00000001;
+tw_stime lookahead = 0.00000001;
+// static tw_stime lookahead = 0;
 static tw_lpid	 nlp_per_pe = 3; // Vivek: number of nodes
-
-
 static tw_stime	 wait_time_avg = 0.0;
 
 #endif
