@@ -32,28 +32,17 @@ init(airport_state * s, tw_lp * lp)
         s->max_refractory_period = 1.0;
 	s->firing_threshold = 1.0;
 	s->number_of_outgoing_edges = 1;
-        s->number_of_edge_parameters = 3;
+        s->number_of_edge_parameters = 2;
 
-        //// Start Memory Allocation ///
-        s->outgoing_edge_info = tw_calloc(TW_LOC,"oe",sizeof(tw_stime *) , s->number_of_outgoing_edges);
-        for(int x=0; x< s->number_of_outgoing_edges; x++)
-          s->outgoing_edge_info[x] = tw_calloc(TW_LOC,"oe_info",sizeof(tw_stime *) , s->number_of_edge_parameters);
+        s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
+         s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
+         s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
 
-//        for(int x=0; x< s->number_of_outgoing_edges; x++)
-//          free(s->outgoing_edge_info[x]);
-//
-//        free(s->outgoing_edge_info);
-
-        /// End Memory Allocation ///
-
-        s->outgoing_edge_info[0][0] = 1;
-        // node 0 has delay of 1 unit to node 1
-	s->outgoing_edge_info[0][1] = 1.0;
-	s->outgoing_edge_info[0][2] = 1.0;
-
-        printf("\t Node 0 Parameters\n");
-        // printf("\t%s %11.11f\n", " ED Node 0 to Node 1: ", s->outgoing_edge_info[0][1]);
-        printf("\t%s %lf\n", " ED Node 0 to Node 1: ", s->outgoing_edge_info[0][1]);
+         s->outgoing_edge_info_dst[0] = 1;
+         s->outgoing_edge_info_dly[0] = 1.0;
+         s->outgoing_edge_info_wgt[0] = 1;
+         printf("\t Node 0 Parameters\n");
+         printf("\t%s %lf\n", " ED Node 0 to Node 1: ", s->outgoing_edge_info_dst[0]);
 
 	break;
       }
@@ -63,31 +52,24 @@ init(airport_state * s, tw_lp * lp)
 	s->max_refractory_period = 1.0;
 	s->firing_threshold = 1.0;
 	s->number_of_outgoing_edges = 2;
-        s->number_of_edge_parameters = 3;
+        s->number_of_edge_parameters = 2;
 
-        //// Start Memory Allocation ///
-       s->outgoing_edge_info = tw_calloc(TW_LOC,"oe",sizeof(tw_stime *) , s->number_of_outgoing_edges);
-        for(int x=0; x< s->number_of_outgoing_edges; x++)
-          s->outgoing_edge_info[x] = tw_calloc(TW_LOC,"oe_info",sizeof(tw_stime *) , s->number_of_edge_parameters);
+         s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
+         s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
+         s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
 
-
-        /// End Memory Allocation ///
-
-	// node 1 is connected to node 2
-	s->outgoing_edge_info[0][0] = 2;
-	s->outgoing_edge_info[0][1] = 1.0;
-	s->outgoing_edge_info[0][2] = 1.0;
-        // node 1 is connected back to node 0
-        // with a delay of 2 time units
-	s->outgoing_edge_info[1][0] = 0;
-	s->outgoing_edge_info[1][1] = 1.0;
-	s->outgoing_edge_info[1][2] = 1.0;
+         s->outgoing_edge_info_dst[0] = 2;
+         s->outgoing_edge_info_dly[0] = 1.0;
+         s->outgoing_edge_info_wgt[0] = 1;
+         s->outgoing_edge_info_dst[1] = 0;
+         s->outgoing_edge_info_dly[1] = 1.0;
+         s->outgoing_edge_info_wgt[1] = 1;
 
         printf("\t Node 1 Parameters \n");
         // printf("\t%s %11.11f\n", " ED Node 1 to Node 2: ", s->outgoing_edge_info[0][1]);
         // printf("\t%s %11.11f\n", " ED Node 1 to Node 0: ", s->outgoing_edge_info[1][1]);
-        printf("\t%s %lf\n", " ED Node 1 to Node 2: ", s->outgoing_edge_info[0][1]);
-        printf("\t%s %lf\n", " ED Node 1 to Node 0: ", s->outgoing_edge_info[1][1]);
+        printf("\t%s %lf\n", " ED Node 1 to Node 2: ", s->outgoing_edge_info_dst[0]);
+        printf("\t%s %lf\n", " ED Node 1 to Node 0: ", s->outgoing_edge_info_dst[1]);
 	break;
       }
     case 2:
@@ -96,25 +78,18 @@ init(airport_state * s, tw_lp * lp)
        	s->max_refractory_period = 1.0;
 	s->firing_threshold = 1.0;
 	s->number_of_outgoing_edges = 1;
-        s->number_of_edge_parameters = 3;
+        s->number_of_edge_parameters = 2;
 
-        //// Start Memory Allocation ///
-       s->outgoing_edge_info = tw_calloc(TW_LOC,"oe",sizeof(tw_stime *) , s->number_of_outgoing_edges);
-        for(int x=0; x< s->number_of_outgoing_edges; x++)
-          s->outgoing_edge_info[x] = tw_calloc(TW_LOC,"oe_info",sizeof(tw_stime *), s->number_of_edge_parameters);
+         s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
+         s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
+         s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
 
-
-        /// End Memory Allocation ///
-
-
-        // node 2 is connected to node 0
-	s->outgoing_edge_info[0][0] = 0;
-	s->outgoing_edge_info[0][1] = 1.5;
-	s->outgoing_edge_info[0][2] = 1;
+         s->outgoing_edge_info_dst[0] = 0;
+         s->outgoing_edge_info_dly[0] = 1.5;
+         s->outgoing_edge_info_wgt[0] = 1;
 
         printf("\t Node 2 Parameters \n");
-        // printf("\t%s %11.11f\n", " ED Node 2 to Node 0: ", s->outgoing_edge_info[0][1]);
-        printf("\t%s %lf\n", " ED Node 2 to Node 0: ", s->outgoing_edge_info[0][1]);
+        printf("\t%s %lf\n", " ED Node 2 to Node 0: ", s->outgoing_edge_info_dly[0]);
 	break;
       }
     }
@@ -209,12 +184,13 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
           // need to do this for each outgoing edge
           for(i=0; i < s->number_of_outgoing_edges; i++)
           {
-            dst_lp = s->outgoing_edge_info[i][0];
-            ts     = s->outgoing_edge_info[i][1];
+            dst_lp = s->outgoing_edge_info_dst[i];
+            ts     = s->outgoing_edge_info_dly[i];
             e = tw_event_new(dst_lp, ts, lp);
             m = tw_event_data(e);
             m->type = ARRIVING;
-            m->edge_weight = s->outgoing_edge_info[i][2];
+            // m->edge_weight = s->outgoing_edge_info[i][2];
+            m->edge_weight = s->outgoing_edge_info_wgt[i];
             m->signal_origin = lp->gid;
             tw_event_send(e);
             printf("\t\t%s %lu\n", "Sending Outbound Signal to: ", dst_lp);
@@ -229,15 +205,18 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
 void
 rc_event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
 {
+  printf("\n %s \n", "DOING REVERSE COMPUTATION");
   switch(msg->type)
   {
     case ARRIVING:
+      printf("\n %s \n", "DOING REVERSE COMPUTATION ARRIVING");
       s->remaining_refractory_period = msg->prev_remaining_refractory_period;
       s->current_amplitude = msg->prev_current_amplitude;
       s->last_evaluation_time = msg->previous_evaluation_time;
       break;
 
     case DEPARTING:
+      printf("\n %s \n", "DOING REVERSE COMPUTATION DEPARTING");
       s->current_amplitude = msg->prev_current_amplitude;
       s->last_fired_time   = msg->prev_last_fired_time;
       break;
