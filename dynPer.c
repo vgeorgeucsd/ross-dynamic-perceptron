@@ -32,19 +32,19 @@ init(airport_state * s, tw_lp * lp)
         s->max_refractory_period = 1.0;
 	s->firing_threshold = 1.0;
 	s->number_of_outgoing_edges = 1;
-        s->number_of_edge_parameters = 2;
+        s->number_of_edge_parameters = 3;
 
-//        //// Start Memory Allocation ///
-//        s->outgoing_edge_info = malloc(sizeof(tw_stime *) * s->number_of_outgoing_edges);
-//        for(int x=0; x< s->number_of_outgoing_edges; x++)
-//          s->outgoing_edge_info[x] = malloc(sizeof(tw_stime *) * s->number_of_edge_parameters);
-//
+        //// Start Memory Allocation ///
+        s->outgoing_edge_info = tw_calloc(TW_LOC,"oe",sizeof(tw_stime *) , s->number_of_outgoing_edges);
+        for(int x=0; x< s->number_of_outgoing_edges; x++)
+          s->outgoing_edge_info[x] = tw_calloc(TW_LOC,"oe_info",sizeof(tw_stime *) , s->number_of_edge_parameters);
+
 //        for(int x=0; x< s->number_of_outgoing_edges; x++)
 //          free(s->outgoing_edge_info[x]);
 //
 //        free(s->outgoing_edge_info);
-//
-//        /// End Memory Allocation ///
+
+        /// End Memory Allocation ///
 
         s->outgoing_edge_info[0][0] = 1;
         // node 0 has delay of 1 unit to node 1
@@ -63,17 +63,13 @@ init(airport_state * s, tw_lp * lp)
 	s->max_refractory_period = 1.0;
 	s->firing_threshold = 1.0;
 	s->number_of_outgoing_edges = 2;
-        s->number_of_edge_parameters = 2;
+        s->number_of_edge_parameters = 3;
 
-//        //// Start Memory Allocation ///
-//        s->outgoing_edge_info = malloc(sizeof(tw_stime *) * s->number_of_outgoing_edges);
-//        for(int x=0; x< s->number_of_outgoing_edges; x++)
-//          s->outgoing_edge_info[x] = malloc(sizeof(tw_stime *) * s->number_of_edge_parameters);
-//
-//        for(int x=0; x< s->number_of_outgoing_edges; x++)
-//          free(s->outgoing_edge_info[x]);
-//
-//        free(s->outgoing_edge_info);
+        //// Start Memory Allocation ///
+       s->outgoing_edge_info = tw_calloc(TW_LOC,"oe",sizeof(tw_stime *) , s->number_of_outgoing_edges);
+        for(int x=0; x< s->number_of_outgoing_edges; x++)
+          s->outgoing_edge_info[x] = tw_calloc(TW_LOC,"oe_info",sizeof(tw_stime *) , s->number_of_edge_parameters);
+
 
         /// End Memory Allocation ///
 
@@ -100,19 +96,15 @@ init(airport_state * s, tw_lp * lp)
        	s->max_refractory_period = 1.0;
 	s->firing_threshold = 1.0;
 	s->number_of_outgoing_edges = 1;
-        s->number_of_edge_parameters = 2;
+        s->number_of_edge_parameters = 3;
 
-//        //// Start Memory Allocation ///
-//        s->outgoing_edge_info = malloc(sizeof(tw_stime *) * s->number_of_outgoing_edges);
-//        for(int x=0; x< s->number_of_outgoing_edges; x++)
-//          s->outgoing_edge_info[x] = malloc(sizeof(tw_stime *) * s->number_of_edge_parameters);
-//
-//        for(int x=0; x< s->number_of_outgoing_edges; x++)
-//          free(s->outgoing_edge_info[x]);
-//
-//        free(s->outgoing_edge_info);
-//
-//        /// End Memory Allocation ///
+        //// Start Memory Allocation ///
+       s->outgoing_edge_info = tw_calloc(TW_LOC,"oe",sizeof(tw_stime *) , s->number_of_outgoing_edges);
+        for(int x=0; x< s->number_of_outgoing_edges; x++)
+          s->outgoing_edge_info[x] = tw_calloc(TW_LOC,"oe_info",sizeof(tw_stime *), s->number_of_edge_parameters);
+
+
+        /// End Memory Allocation ///
 
 
         // node 2 is connected to node 0

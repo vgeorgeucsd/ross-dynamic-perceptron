@@ -28,8 +28,8 @@ struct airport_state
 	tw_stime	last_evaluation_time;
         int             number_of_edge_parameters;
 	int		number_of_outgoing_edges; // this is the number of outoging edges
-        // tw_stime        **outgoing_edge_info;
-       	tw_stime	outgoing_edge_info[5000][3]; // contains the gid of the outgoing edges,
+        tw_stime        **outgoing_edge_info;
+       	// tw_stime	outgoing_edge_info[5000][3]; // contains the gid of the outgoing edges,
                                                  // the 1st dimension contains the destination lp
                                                  // the 2nd dim. contains the delay
                                                  // Need to TODO
