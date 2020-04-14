@@ -59,7 +59,7 @@ struct airport_message
 // tw_stime lookahead = 0.00000001;
 tw_stime lookahead = 3;
 // static tw_stime lookahead = 0;
-static tw_lpid	 nlp_per_pe = 3; // Vivek: number of nodes
+static tw_lpid	 nlp_per_pe = 1; // Vivek: number of nodes
 static tw_stime	 wait_time_avg = 0.0;
 
 #endif

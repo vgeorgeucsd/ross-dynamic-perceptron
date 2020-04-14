@@ -43,7 +43,6 @@ init(airport_state * s, tw_lp * lp)
         s->outgoing_edge_info_wgt[0] = 1;
         printf("\t Node 0 Parameters\n");
         printf("\t%s %lf\n", " ED Node 0 to Node 1: ", s->outgoing_edge_info_dst[0]);
-
 	break;
       }
     case 1:
@@ -240,7 +239,6 @@ rc_event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * l
       printf("\t%s %lf\n", "Current Amplitude: ", s->current_amplitude);
       printf("\t%s %lf\n\n", "Previous Amplitude: ", msg->prev_current_amplitude);
 
-
       s->remaining_refractory_period = msg->prev_remaining_refractory_period;
       s->current_amplitude = msg->prev_current_amplitude;
       s->last_evaluation_time = msg->previous_evaluation_time;
@@ -259,7 +257,6 @@ rc_event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * l
 
       printf("\t%s %lf\n", "Current Amplitude: ", s->current_amplitude);
       printf("\t%s %lf\n\n", "Previous Amplitude: ", msg->prev_current_amplitude);
-
 
       s->current_amplitude = msg->prev_current_amplitude;
       s->last_fired_time   = msg->prev_last_fired_time;
