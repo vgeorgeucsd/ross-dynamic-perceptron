@@ -13,7 +13,7 @@ enum airport_event_t
 {
 	ARRIVING = 1,
 	DEPARTING,
-	DROPPED
+	DROPPING
 };
 
 struct airport_state
@@ -29,7 +29,11 @@ struct airport_state
         int             number_of_edge_parameters;
 	int		number_of_outgoing_edges; // this is the number of outoging edges
         // tw_stime        **outgoing_edge_info;
-       	tw_stime	outgoing_edge_info[5000][3]; // contains the gid of the outgoing edges,
+        tw_stime        *outgoing_edge_info_dst;
+        tw_stime        *outgoing_edge_info_dly;
+        tw_stime        *outgoing_edge_info_wgt;
+
+       	// tw_stime	outgoing_edge_info[5000][3]; // contains the gid of the outgoing edges,
                                                  // the 1st dimension contains the destination lp
                                                  // the 2nd dim. contains the delay
                                                  // Need to TODO
@@ -52,7 +56,8 @@ struct airport_message
         int             signal_origin;
 };
 
-tw_stime lookahead = 0.00000001;
+// tw_stime lookahead = 0.00000001;
+tw_stime lookahead = 3;
 // static tw_stime lookahead = 0;
 static tw_lpid	 nlp_per_pe = 3; // Vivek: number of nodes
 static tw_stime	 wait_time_avg = 0.0;

@@ -34,26 +34,15 @@ init(airport_state * s, tw_lp * lp)
 	s->number_of_outgoing_edges = 1;
         s->number_of_edge_parameters = 2;
 
-//        //// Start Memory Allocation ///
-//        s->outgoing_edge_info = malloc(sizeof(tw_stime *) * s->number_of_outgoing_edges);
-//        for(int x=0; x< s->number_of_outgoing_edges; x++)
-//          s->outgoing_edge_info[x] = malloc(sizeof(tw_stime *) * s->number_of_edge_parameters);
-//
-//        for(int x=0; x< s->number_of_outgoing_edges; x++)
-//          free(s->outgoing_edge_info[x]);
-//
-//        free(s->outgoing_edge_info);
-//
-//        /// End Memory Allocation ///
+        s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
+        s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
+        s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
 
-        s->outgoing_edge_info[0][0] = 1;
-        // node 0 has delay of 1 unit to node 1
-	s->outgoing_edge_info[0][1] = 1.0;
-	s->outgoing_edge_info[0][2] = 1.0;
-
+        s->outgoing_edge_info_dst[0] = 1;
+        s->outgoing_edge_info_dly[0] = 1.0;
+        s->outgoing_edge_info_wgt[0] = 1;
         printf("\t Node 0 Parameters\n");
-        // printf("\t%s %11.11f\n", " ED Node 0 to Node 1: ", s->outgoing_edge_info[0][1]);
-        printf("\t%s %lf\n", " ED Node 0 to Node 1: ", s->outgoing_edge_info[0][1]);
+        printf("\t%s %lf\n", " ED Node 0 to Node 1: ", s->outgoing_edge_info_dst[0]);
 
 	break;
       }
@@ -65,33 +54,22 @@ init(airport_state * s, tw_lp * lp)
 	s->number_of_outgoing_edges = 2;
         s->number_of_edge_parameters = 2;
 
-//        //// Start Memory Allocation ///
-//        s->outgoing_edge_info = malloc(sizeof(tw_stime *) * s->number_of_outgoing_edges);
-//        for(int x=0; x< s->number_of_outgoing_edges; x++)
-//          s->outgoing_edge_info[x] = malloc(sizeof(tw_stime *) * s->number_of_edge_parameters);
-//
-//        for(int x=0; x< s->number_of_outgoing_edges; x++)
-//          free(s->outgoing_edge_info[x]);
-//
-//        free(s->outgoing_edge_info);
+        s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
+        s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
+        s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
 
-        /// End Memory Allocation ///
-
-	// node 1 is connected to node 2
-	s->outgoing_edge_info[0][0] = 2;
-	s->outgoing_edge_info[0][1] = 1.0;
-	s->outgoing_edge_info[0][2] = 1.0;
-        // node 1 is connected back to node 0
-        // with a delay of 2 time units
-	s->outgoing_edge_info[1][0] = 0;
-	s->outgoing_edge_info[1][1] = 1.0;
-	s->outgoing_edge_info[1][2] = 1.0;
+        s->outgoing_edge_info_dst[0] = 2;
+        s->outgoing_edge_info_dly[0] = 1.0;
+        s->outgoing_edge_info_wgt[0] = 1;
+        s->outgoing_edge_info_dst[1] = 0;
+        s->outgoing_edge_info_dly[1] = 1.0;
+        s->outgoing_edge_info_wgt[1] = 1;
 
         printf("\t Node 1 Parameters \n");
         // printf("\t%s %11.11f\n", " ED Node 1 to Node 2: ", s->outgoing_edge_info[0][1]);
         // printf("\t%s %11.11f\n", " ED Node 1 to Node 0: ", s->outgoing_edge_info[1][1]);
-        printf("\t%s %lf\n", " ED Node 1 to Node 2: ", s->outgoing_edge_info[0][1]);
-        printf("\t%s %lf\n", " ED Node 1 to Node 0: ", s->outgoing_edge_info[1][1]);
+        printf("\t%s %lf\n", " ED Node 1 to Node 2: ", s->outgoing_edge_info_dst[0]);
+        printf("\t%s %lf\n", " ED Node 1 to Node 0: ", s->outgoing_edge_info_dst[1]);
 	break;
       }
     case 2:
@@ -102,27 +80,16 @@ init(airport_state * s, tw_lp * lp)
 	s->number_of_outgoing_edges = 1;
         s->number_of_edge_parameters = 2;
 
-//        //// Start Memory Allocation ///
-//        s->outgoing_edge_info = malloc(sizeof(tw_stime *) * s->number_of_outgoing_edges);
-//        for(int x=0; x< s->number_of_outgoing_edges; x++)
-//          s->outgoing_edge_info[x] = malloc(sizeof(tw_stime *) * s->number_of_edge_parameters);
-//
-//        for(int x=0; x< s->number_of_outgoing_edges; x++)
-//          free(s->outgoing_edge_info[x]);
-//
-//        free(s->outgoing_edge_info);
-//
-//        /// End Memory Allocation ///
+        s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
+        s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
+        s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
 
-
-        // node 2 is connected to node 0
-	s->outgoing_edge_info[0][0] = 0;
-	s->outgoing_edge_info[0][1] = 1.5;
-	s->outgoing_edge_info[0][2] = 1;
+        s->outgoing_edge_info_dst[0] = 0;
+        s->outgoing_edge_info_dly[0] = 1.5;
+        s->outgoing_edge_info_wgt[0] = 1;
 
         printf("\t Node 2 Parameters \n");
-        // printf("\t%s %11.11f\n", " ED Node 2 to Node 0: ", s->outgoing_edge_info[0][1]);
-        printf("\t%s %lf\n", " ED Node 2 to Node 0: ", s->outgoing_edge_info[0][1]);
+        printf("\t%s %lf\n", " ED Node 2 to Node 0: ", s->outgoing_edge_info_dly[0]);
 	break;
       }
     }
@@ -189,16 +156,22 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
               m->type = DEPARTING;
               m->last_fired_time = s->last_fired_time;
               m->node_activation_amplitude = s->current_amplitude;
+              m->prev_current_amplitude = msg->prev_current_amplitude;
               tw_event_send(e);
             }
           }
           else
           {
             // else drop the packet
-            printf("\n\n \t Node Refractory, Dropped Packet \n\n");
-            msg->prev_remaining_refractory_period = s->remaining_refractory_period;
-            s->remaining_refractory_period = s->max_refractory_period - sig_diff;
-            printf("\t\t%s %11.11lf\n", "Remaining Refractory Period: ", s->remaining_refractory_period);
+
+            // e = tw_event_new(lp->gid, tw_now(lp), lp);
+            e = tw_event_new(lp->gid, 0 ,lp);
+            m = tw_event_data(e);
+            m->type = DROPPING;
+            m->last_fired_time = s->last_fired_time;
+            m->signal_origin = msg->signal_origin;
+            m->prev_remaining_refractory_period = s->remaining_refractory_period;
+            tw_event_send(e);
           }
           break;
         }
@@ -217,12 +190,13 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
           // need to do this for each outgoing edge
           for(i=0; i < s->number_of_outgoing_edges; i++)
           {
-            dst_lp = s->outgoing_edge_info[i][0];
-            ts     = s->outgoing_edge_info[i][1];
+            dst_lp = s->outgoing_edge_info_dst[i];
+            ts     = s->outgoing_edge_info_dly[i];
             e = tw_event_new(dst_lp, ts, lp);
             m = tw_event_data(e);
             m->type = ARRIVING;
-            m->edge_weight = s->outgoing_edge_info[i][2];
+            // m->edge_weight = s->outgoing_edge_info[i][2];
+            m->edge_weight = s->outgoing_edge_info_wgt[i];
             m->signal_origin = lp->gid;
             tw_event_send(e);
             printf("\t\t%s %lu\n", "Sending Outbound Signal to: ", dst_lp);
@@ -231,23 +205,82 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
           }
           break;
         }
+
+      case DROPPING:
+        {
+          printf("\n\n \t Node Refractory, Dropped Packet \n\n");
+          printf("\t%s %li\n", "Node Droping Signal ID: ", lp->gid);
+          printf("\t%s %i\n", "Signal Arrived from Node: ", msg->signal_origin);
+          s->remaining_refractory_period = s->max_refractory_period - (tw_now(lp) - msg->last_fired_time);
+          s->current_amplitude = 0;
+          printf("\t\t%s %11.11lf\n", "Remaining Refractory Period: ", s->remaining_refractory_period);
+          printf("\t%s %i\n", "Signal Arrived from Node: ", msg->signal_origin);
+          break;
+        }
       }
 }
 
 void
 rc_event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
 {
+  printf("\n %s \n", "DOING REVERSE COMPUTATION");
   switch(msg->type)
   {
     case ARRIVING:
+      printf("\n %s \n", "DOING REVERSE COMPUTATION ARRIVING");
+
+      printf("\t%s %d\n", "Current node: ", s->id);
+      printf("\t\t%s %lf\n", "At Time: ", tw_now(lp));
+
+      printf("\t%s %lf\n", "Last eval time: ", s->last_evaluation_time);
+      printf("\t%s %lf\n\n", "Previous eval time: ", msg->previous_evaluation_time);
+
+      printf("\t%s %lf\n", "Current Refractory Period: ", s->remaining_refractory_period);
+      printf("\t%s %lf\n\n", "Previous Refractory Period: ", msg->prev_remaining_refractory_period);
+      printf("\t%s %lf\n", "Current Amplitude: ", s->current_amplitude);
+      printf("\t%s %lf\n\n", "Previous Amplitude: ", msg->prev_current_amplitude);
+
+
       s->remaining_refractory_period = msg->prev_remaining_refractory_period;
       s->current_amplitude = msg->prev_current_amplitude;
       s->last_evaluation_time = msg->previous_evaluation_time;
       break;
 
     case DEPARTING:
+      printf("\n %s \n", "DOING REVERSE COMPUTATION DEPARTING");
+
+      printf("\t%s %d\n", "Current node: ", s->id);
+      printf("\t\t%s %lf\n", "At Time: ", tw_now(lp));
+
+      printf("\t%s %lf\n", "Last eval time: ", s->last_evaluation_time);
+
+      printf("\t%s %lf\n", "Last fired time: ", s->last_fired_time);
+      printf("\t%s %lf\n\n", "Previous fired time: ", msg->prev_last_fired_time);
+
+      printf("\t%s %lf\n", "Current Amplitude: ", s->current_amplitude);
+      printf("\t%s %lf\n\n", "Previous Amplitude: ", msg->prev_current_amplitude);
+
+
       s->current_amplitude = msg->prev_current_amplitude;
       s->last_fired_time   = msg->prev_last_fired_time;
+      break;
+
+    case DROPPING:
+      printf("\n %s \n", "DOING REVERSE COMPUTATION DROPPING");
+
+      printf("\t%s %d\n", "Current node: ", s->id);
+      printf("\t\t%s %lf\n", "At Time: ", tw_now(lp));
+
+      printf("\t%s %i\n", "Signal Arrived from Node: ", msg->signal_origin);
+
+      printf("\t%s %lf\n", "Current Amplitude: ", s->current_amplitude);
+      printf("\t%s %lf\n\n", "Previous Amplitude: ", msg->prev_current_amplitude);
+
+      printf("\t%s %lf\n", "Current Refractory Period: ", s->remaining_refractory_period);
+      printf("\t%s %lf\n\n", "Previous Refractory Period: ", msg->prev_remaining_refractory_period);
+
+      s->remaining_refractory_period = msg->prev_remaining_refractory_period;
+      s->current_amplitude = msg->prev_current_amplitude;
       break;
   }
   return;
