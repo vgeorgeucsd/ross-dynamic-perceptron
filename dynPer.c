@@ -10,7 +10,7 @@
 tw_peid
 mapping(tw_lpid gid)
 {
-	return (tw_peid) gid / g_tw_nlp;
+  return (tw_peid) gid / g_tw_nlp;
 }
 
 void
@@ -28,10 +28,10 @@ init(airport_state * s, tw_lp * lp)
     case 0:
       {
         s->id = 0; // this is the node id
-	// node 0 is connected to node 1
+        // node 0 is connected to node 1
         s->max_refractory_period = 1.0;
-	s->firing_threshold = 1.0;
-	s->number_of_outgoing_edges = 1;
+        s->firing_threshold = 1.0;
+        s->number_of_outgoing_edges = 1;
         s->number_of_edge_parameters = 2;
 
         s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
@@ -43,14 +43,15 @@ init(airport_state * s, tw_lp * lp)
         s->outgoing_edge_info_wgt[0] = 1;
         printf("\t Node 0 Parameters\n");
         printf("\t%s %lf\n", " ED Node 0 to Node 1: ", s->outgoing_edge_info_dst[0]);
-	break;
+
+        break;
       }
     case 1:
       {
         s->id = 1;
-	s->max_refractory_period = 1.0;
-	s->firing_threshold = 1.0;
-	s->number_of_outgoing_edges = 2;
+        s->max_refractory_period = 1.0;
+        s->firing_threshold = 1.0;
+        s->number_of_outgoing_edges = 2;
         s->number_of_edge_parameters = 2;
 
         s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
@@ -69,14 +70,14 @@ init(airport_state * s, tw_lp * lp)
         // printf("\t%s %11.11f\n", " ED Node 1 to Node 0: ", s->outgoing_edge_info[1][1]);
         printf("\t%s %lf\n", " ED Node 1 to Node 2: ", s->outgoing_edge_info_dst[0]);
         printf("\t%s %lf\n", " ED Node 1 to Node 0: ", s->outgoing_edge_info_dst[1]);
-	break;
+        break;
       }
     case 2:
       {
         s->id = 2;
-       	s->max_refractory_period = 1.0;
-	s->firing_threshold = 1.0;
-	s->number_of_outgoing_edges = 1;
+        s->max_refractory_period = 1.0;
+        s->firing_threshold = 1.0;
+        s->number_of_outgoing_edges = 1;
         s->number_of_edge_parameters = 2;
 
         s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
@@ -89,7 +90,7 @@ init(airport_state * s, tw_lp * lp)
 
         printf("\t Node 2 Parameters \n");
         printf("\t%s %lf\n", " ED Node 2 to Node 0: ", s->outgoing_edge_info_dly[0]);
-	break;
+  break;
       }
     }
 
@@ -239,6 +240,7 @@ rc_event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * l
       printf("\t%s %lf\n", "Current Amplitude: ", s->current_amplitude);
       printf("\t%s %lf\n\n", "Previous Amplitude: ", msg->prev_current_amplitude);
 
+
       s->remaining_refractory_period = msg->prev_remaining_refractory_period;
       s->current_amplitude = msg->prev_current_amplitude;
       s->last_evaluation_time = msg->previous_evaluation_time;
@@ -257,6 +259,7 @@ rc_event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * l
 
       printf("\t%s %lf\n", "Current Amplitude: ", s->current_amplitude);
       printf("\t%s %lf\n\n", "Previous Amplitude: ", msg->prev_current_amplitude);
+
 
       s->current_amplitude = msg->prev_current_amplitude;
       s->last_fired_time   = msg->prev_last_fired_time;
@@ -286,69 +289,69 @@ rc_event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * l
 void
 final(airport_state * s, tw_lp * lp)
 {
-	return;
+  return;
 }
 
 tw_lptype airport_lps[] =
 {
-	{
-		(init_f) init,
-        	(pre_run_f) NULL,
-		(event_f) event_handler,
-		(revent_f) rc_event_handler,
-		(commit_f) NULL,
-		(final_f) final,
-		(map_f) mapping,
-		sizeof(airport_state),
-	},
-	{0},
+  {
+    (init_f) init,
+    (pre_run_f) NULL,
+    (event_f) event_handler,
+    (revent_f) rc_event_handler,
+    (commit_f) NULL,
+    (final_f) final,
+    (map_f) mapping,
+    sizeof(airport_state),
+  },
+  {0},
 };
 
 const tw_optdef app_opt [] =
 {
-	TWOPT_GROUP("Airport Model"),
+  TWOPT_GROUP("Airport Model"),
         TWOPT_STIME("lookahead", lookahead, "lookahead for events"),
-	TWOPT_END()
+  TWOPT_END()
 };
 
 int
 main(int argc, char **argv, char **env)
 {
-	int i;
+  int i;
 
-	tw_opt_add(app_opt);
-	tw_init(&argc, &argv);
+  tw_opt_add(app_opt);
+  tw_init(&argc, &argv);
 
-	// nlp_per_pe /= (tw_nnodes() * g_tw_npe); // Vivek: commented this out and added next line
+  // nlp_per_pe /= (tw_nnodes() * g_tw_npe); // Vivek: commented this out and added next line
         // nlp_per_pe = g_tw_nlp;
         printf("\n %s%li\n", "Number of possible nodes: ", g_tw_nlp);
         printf("\n\t\t%s %u\n", "Number of nodes/processors defined: ", tw_nnodes());
-	g_tw_ts_end = 10; // Sets the simulation end time:w
+  g_tw_ts_end = 10; // Sets the simulation end time:w
         printf("\n\t\t%s %lf\n", "Simulation end time: ", g_tw_ts_end);
 
         g_tw_lookahead = lookahead;
 
-	tw_define_lps(nlp_per_pe, sizeof(airport_message));
+  tw_define_lps(nlp_per_pe, sizeof(airport_message));
 
-	for(i = 0; i < g_tw_nlp; i++)
+  for(i = 0; i < g_tw_nlp; i++)
         {
           tw_lp_settype(i, &airport_lps[0]);
         }
 
         printf("\n Start Simulation \n");
-	tw_run();
+  tw_run();
         printf("\n End Simulation \n");
 
-	if(tw_ismaster())
-	{
-		printf("\nDyn Per Model Statistics:\n");
-		printf("\t%-50s %11.4lf\n", "Average Waiting Time", wait_time_avg);
-//		printf("\t%-50s %11lu\n", "Number of nodes",
-//			nlp_per_pe * g_tw_npe * tw_nnodes());
+  if(tw_ismaster())
+  {
+    printf("\nDyn Per Model Statistics:\n");
+    printf("\t%-50s %11.4lf\n", "Average Waiting Time", wait_time_avg);
+//    printf("\t%-50s %11lu\n", "Number of nodes",
+//      nlp_per_pe * g_tw_npe * tw_nnodes());
                 printf("\t%-50s %d\n", "ROSS do not print value ", ROSS_DO_NOT_PRINT);
-	}
+  }
 
-	tw_end();
+  tw_end();
 
-	return 0;
+  return 0;
 }

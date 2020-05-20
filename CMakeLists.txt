@@ -1,8 +1,8 @@
-INCLUDE_DIRECTORIES(${ROSS_SOURCE_DIR} ${ROSS_BINARY_DIR})
+INCLUDE_DIRECTORIES(${ROSS_SOURCE_DIR} ${ROSS_BINARY_DIR} /home/vivek/research/dynamic_perceptron/livermore/new_template_model/igraph/src/.libs /home/vivek/research/dynamic_perceptron/livermore/new_template_model/igraph/include)
 
 SET(dynPer_srcs
 dynPer.c		dynPer.h)
 
-ADD_EXECUTABLE(ross_dynPer ${dynPer_srcs})
+ADD_EXECUTABLE(dynPer ${dynPer_srcs})
 
-TARGET_LINK_LIBRARIES(ross_dynPer ROSS m)
+TARGET_LINK_LIBRARIES(dynPer ROSS m)
