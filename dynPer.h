@@ -2,6 +2,7 @@
 #define INC_dynPer_h
 
 #include <ross.h>
+// #include "generate_graph.h"
 
 #define ROSS_DO_NOT_PRINT 1
 
@@ -25,10 +26,10 @@ struct airport_state
   tw_stime        remaining_refractory_period; // the time which remains in the nodes refractory period
   tw_stime        last_fired_time;
   tw_stime        last_evaluation_time;
-  int             number_of_edge_parameters;
+  // int             number_of_edge_parameters;
   int             number_of_outgoing_edges; // this is the number of outoging edges
   // tw_stime        **outgoing_edge_info;
-  tw_stime        *outgoing_edge_info_dst;
+  long int        *outgoing_edge_info_dst;
   tw_stime        *outgoing_edge_info_dly;
   tw_stime        *outgoing_edge_info_wgt;
 
@@ -58,7 +59,7 @@ struct airport_message
 // tw_stime lookahead = 0.00000001;
 tw_stime lookahead = 3;
 // static tw_stime lookahead = 0;
-static tw_lpid	 nlp_per_pe = 3; // Vivek: number of nodes
+static tw_lpid	 nlp_per_pe = 793; // Vivek: number of nodes
 static tw_stime	 wait_time_avg = 0.0;
 
 #endif

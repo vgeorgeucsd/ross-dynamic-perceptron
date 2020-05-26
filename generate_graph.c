@@ -14,8 +14,8 @@ struct Graph {
 
 // A data structure to store adjacency list nodes of the graph
 struct Node {
-  int dest, weight;
-  float delay;
+  int dest;
+  float delay,weight;
   int nid;
   float ref_per;
   float threshold;
@@ -37,7 +37,7 @@ struct Graph* createGraph(FILE* reads)
   // add edges to the directed graph one by one
   int src;
   int dest;
-  int weight;
+  float weight;
   float delay;
   while(fscanf(reads,"%d %d %d %f", &src, &dest, &weight, &delay)==EdgeParms)
   {
@@ -100,7 +100,7 @@ void printGraph(struct Graph* graph)
     struct Node* ptr = graph->head[i];
     while (ptr != NULL)
     {
-      printf("%d -> %d (%d)\t", i, ptr->dest, ptr->weight);
+      printf("%d -> %d (wgt: %f, dly: %f)\t", i, ptr->dest, ptr->weight, ptr->delay);
       ptr = ptr->next;
     }
 

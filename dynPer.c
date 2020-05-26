@@ -1,4 +1,6 @@
 #include "dynPer.h"
+#include "generate_graph.h"
+#include "generate_stimulus.h"
 #include <math.h>
 /*
   dynPer.c
@@ -6,6 +8,13 @@
   20200101
   Vivek George
 */
+
+char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_input.793";
+char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_input.793";
+char stim_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/stim_input.74.5";
+//struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
+struct Graph* graph;
+struct Stim* stim;
 
 tw_peid
 mapping(tw_lpid gid)
@@ -16,94 +25,195 @@ mapping(tw_lpid gid)
 void
 init(airport_state * s, tw_lp * lp)
 {
+
+  long int vertex = (long int) lp->gid;
+  extern struct Graph* graph;
+  // printGraph(graph);
+
+  extern struct Stim* stim;
+  struct StimNode* ptr2 = stim->head[vertex];
+
+  // Initial values of vertices
   tw_event *e;
   airport_message *m;
   s->last_fired_time = -10; // set this to null to begin
   s->current_amplitude = 0.0;
   s->last_evaluation_time = 0.0; // set this to null
 
-  switch(lp->gid) // Set the outgoing connections
+  int numOutEdges=0;
+  int numOutEdges1=0;
+
+  printf("Node %li Parameters:\n",vertex);
+
+  s->id = graph->head[vertex]->nid;
+  s->max_refractory_period = graph->head[vertex]->ref_per;
+  s->firing_threshold = graph->head[vertex]->threshold;
+  // s->number_of_edge_parameters = 2;
+
+  struct Node* ptr = graph->head[vertex];
+  while (ptr != NULL)
+  {
+    ptr = ptr->next;
+    numOutEdges++;
+  }
+  printf("\tNumber of outgoing edges: %d\n", numOutEdges);
+  s->number_of_outgoing_edges = numOutEdges;
+  if(s->number_of_outgoing_edges == 0 || graph->head[vertex]->dest == -1 )
+  {
+    // do nothing
+    s->number_of_outgoing_edges = 0;
+  }
+  else
+  {
+    s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
+    s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
+    s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
+
+    struct Node* ptr1 = graph->head[vertex];
+    while (ptr1 != NULL)
     {
-
-    case 0:
-      {
-        s->id = 0; // this is the node id
-        // node 0 is connected to node 1
-        s->max_refractory_period = 1.0;
-        s->firing_threshold = 1.0;
-        s->number_of_outgoing_edges = 1;
-        s->number_of_edge_parameters = 2;
-
-        s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
-        s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
-        s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
-
-        s->outgoing_edge_info_dst[0] = 1;
-        s->outgoing_edge_info_dly[0] = 1.0;
-        s->outgoing_edge_info_wgt[0] = 1;
-        printf("\t Node 0 Parameters\n");
-        printf("\t%s %lf\n", " ED Node 0 to Node 1: ", s->outgoing_edge_info_dst[0]);
-
-        break;
-      }
-    case 1:
-      {
-        s->id = 1;
-        s->max_refractory_period = 1.0;
-        s->firing_threshold = 1.0;
-        s->number_of_outgoing_edges = 2;
-        s->number_of_edge_parameters = 2;
-
-        s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
-        s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
-        s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
-
-        s->outgoing_edge_info_dst[0] = 2;
-        s->outgoing_edge_info_dly[0] = 1.0;
-        s->outgoing_edge_info_wgt[0] = 1;
-        s->outgoing_edge_info_dst[1] = 0;
-        s->outgoing_edge_info_dly[1] = 1.0;
-        s->outgoing_edge_info_wgt[1] = 1;
-
-        printf("\t Node 1 Parameters \n");
-        // printf("\t%s %11.11f\n", " ED Node 1 to Node 2: ", s->outgoing_edge_info[0][1]);
-        // printf("\t%s %11.11f\n", " ED Node 1 to Node 0: ", s->outgoing_edge_info[1][1]);
-        printf("\t%s %lf\n", " ED Node 1 to Node 2: ", s->outgoing_edge_info_dst[0]);
-        printf("\t%s %lf\n", " ED Node 1 to Node 0: ", s->outgoing_edge_info_dst[1]);
-        break;
-      }
-    case 2:
-      {
-        s->id = 2;
-        s->max_refractory_period = 1.0;
-        s->firing_threshold = 1.0;
-        s->number_of_outgoing_edges = 1;
-        s->number_of_edge_parameters = 2;
-
-        s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
-        s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
-        s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
-
-        s->outgoing_edge_info_dst[0] = 0;
-        s->outgoing_edge_info_dly[0] = 1.5;
-        s->outgoing_edge_info_wgt[0] = 1;
-
-        printf("\t Node 2 Parameters \n");
-        printf("\t%s %lf\n", " ED Node 2 to Node 0: ", s->outgoing_edge_info_dly[0]);
-  break;
-      }
+      s->outgoing_edge_info_dst[numOutEdges1] = ptr1->dest;
+      s->outgoing_edge_info_dly[numOutEdges1] = ptr1->delay;
+      s->outgoing_edge_info_wgt[numOutEdges1] = ptr1->weight;
+      // printf("\t Node %li Parameters:\n",vertex);
+      printf("\tNode %li to Node %li Edge Delay : %f Edge Weight: %f \n", vertex, s->outgoing_edge_info_dst[numOutEdges1], s->outgoing_edge_info_dly[numOutEdges1], s->outgoing_edge_info_wgt[numOutEdges1]);
+      ptr1 = ptr1->next;
+      numOutEdges1++;
     }
+  }
 
-    // tw_event_new(destination logical process, delay , sender logical process)
-    if(lp->gid == 0)
+  // tw_event_new(destination logical process, delay , sender logical process)
+//  if(lp->gid <= 100)
+//  {
+//    e = tw_event_new(lp->gid, 0 , lp);
+//    m = tw_event_data(e);
+//    m->type = ARRIVING;
+//    m->edge_weight = 1;
+//    tw_event_send(e);
+//  }
+  while (ptr2 != NULL && ptr2->weight != 0)
     {
-      e = tw_event_new(lp->gid, 0 , lp);
+      printf("pointer 2 nid: %li\n",vertex);
+      printf("pointer 2 weight: %Lf\n",ptr2->weight);
+      printf("pointer 2 delay: %Lf\n",ptr2->delay);
+      e = tw_event_new(lp->gid, ptr2->delay, lp);
+      printf("created new event\n");
       m = tw_event_data(e);
+      printf("created new message of event\n");
       m->type = ARRIVING;
-      m->edge_weight = 1;
+      m->edge_weight = ptr2->weight;
       tw_event_send(e);
+      ptr2 = ptr2->next;
     }
+
 }
+
+
+//void
+//init(airport_state * s, tw_lp * lp)
+//{
+//  // Initial values of vertices
+//  tw_event *e;
+//  airport_message *m;
+//  s->last_fired_time = -10; // set this to null to begin
+//  s->current_amplitude = 0.0;
+//  s->last_evaluation_time = 0.0; // set this to null
+//
+//
+//  switch(lp->gid) // Set the outgoing connections
+//    {
+//
+//    case 0:
+//      {
+//        s->id = 0; // this is the node id
+//        // node 0 is connected to node 1
+//        s->max_refractory_period = 1.0;
+//        s->firing_threshold = 1.0;
+//        s->number_of_outgoing_edges = 1;
+//        // s->number_of_edge_parameters = 2;
+//
+//        s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
+//        s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
+//        s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
+//
+//        s->outgoing_edge_info_dst[0] = 1;
+//        s->outgoing_edge_info_dly[0] = 1.0;
+//        s->outgoing_edge_info_wgt[0] = 1;
+//        printf("\t Node 0 Parameters\n");
+//        printf("\t%s %lf\n", " ED Node 0 to Node 1: ", s->outgoing_edge_info_dst[0]);
+//
+//        break;
+//      }
+//    case 1:
+//      {
+//        s->id = 1;
+//        s->max_refractory_period = 1.0;
+//        s->firing_threshold = 1.0;
+//        s->number_of_outgoing_edges = 2;
+//        // s->number_of_edge_parameters = 2;
+//
+//        s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
+//        s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
+//        s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
+//
+//        s->outgoing_edge_info_dst[0] = 2;
+//        s->outgoing_edge_info_dly[0] = 1.0;
+//        s->outgoing_edge_info_wgt[0] = 1;
+//        s->outgoing_edge_info_dst[1] = 0;
+//        s->outgoing_edge_info_dly[1] = 1.0;
+//        s->outgoing_edge_info_wgt[1] = 1;
+//
+//        printf("\t Node 1 Parameters \n");
+//        // printf("\t%s %11.11f\n", " ED Node 1 to Node 2: ", s->outgoing_edge_info[0][1]);
+//        // printf("\t%s %11.11f\n", " ED Node 1 to Node 0: ", s->outgoing_edge_info[1][1]);
+//        printf("\t%s %lf\n", " ED Node 1 to Node 2: ", s->outgoing_edge_info_dst[0]);
+//        printf("\t%s %lf\n", " ED Node 1 to Node 0: ", s->outgoing_edge_info_dst[1]);
+//        break;
+//      }
+//    case 2:
+//      {
+//        s->id = 2;
+//        s->max_refractory_period = 1.0;
+//        s->firing_threshold = 1.0;
+//        s->number_of_outgoing_edges = 0;
+//        // s->number_of_edge_parameters = 2;
+//        if(s->number_of_outgoing_edges != 0 )
+//        {
+//          s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
+//          s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
+//          s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
+//
+//          s->outgoing_edge_info_dst[0] = 0;
+//          s->outgoing_edge_info_dly[0] = 1.5;
+//          s->outgoing_edge_info_wgt[0] = 1;
+//          printf("\t Node 2 Parameters \n");
+//          printf("\t%s %lf\n", " ED Node 2 to Node 0: ", s->outgoing_edge_info_dly[0]);
+//
+//        }
+//        // s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
+//        // s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
+//        // s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
+//
+//        // s->outgoing_edge_info_dst[0] = 0;
+//        // s->outgoing_edge_info_dly[0] = 1.5;
+//        // s->outgoing_edge_info_wgt[0] = 1;
+//
+//        // printf("\t Node 2 Parameters \n");
+//        // printf("\t%s %lf\n", " ED Node 2 to Node 0: ", s->outgoing_edge_info_dly[0]);
+//  break;
+//      }
+//    }
+//
+//    // tw_event_new(destination logical process, delay , sender logical process)
+//    if(lp->gid == 0)
+//    {
+//      e = tw_event_new(lp->gid, 0 , lp);
+//      m = tw_event_data(e);
+//      m->type = ARRIVING;
+//      m->edge_weight = 1;
+//      tw_event_send(e);
+//    }
+//}
 
 void
 event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
@@ -188,21 +298,27 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
 
           // send outgoing signals to the other nodes
           // need to do this for each outgoing edge
-          for(i=0; i < s->number_of_outgoing_edges; i++)
+          if(s->number_of_outgoing_edges != 0)
           {
-            dst_lp = s->outgoing_edge_info_dst[i];
-            ts     = s->outgoing_edge_info_dly[i];
-            e = tw_event_new(dst_lp, ts, lp);
-            m = tw_event_data(e);
-            m->type = ARRIVING;
-            // m->edge_weight = s->outgoing_edge_info[i][2];
-            m->edge_weight = s->outgoing_edge_info_wgt[i];
-            m->signal_origin = lp->gid;
-            tw_event_send(e);
-            printf("\t\t%s %lu\n", "Sending Outbound Signal to: ", dst_lp);
-            // printf("\t\t%s %11.11lf\n", "Outbound Signal Delay: ", ts);
-            printf("\t\t%s %lf\n", "Outbount Signal Delay: ", ts);
+            for(i=0; i < s->number_of_outgoing_edges; i++)
+              {
+                dst_lp = s->outgoing_edge_info_dst[i];
+                ts     = s->outgoing_edge_info_dly[i];
+                e = tw_event_new(dst_lp, ts, lp);
+                m = tw_event_data(e);
+                m->type = ARRIVING;
+                // m->edge_weight = s->outgoing_edge_info[i][2];
+                m->edge_weight = s->outgoing_edge_info_wgt[i];
+                m->signal_origin = lp->gid;
+                tw_event_send(e);
+                printf("\t\t%s %lu\n", "Sending Outbound Signal to: ", dst_lp);
+                // printf("\t\t%s %11.11lf\n", "Outbound Signal Delay: ", ts);
+                printf("\t\t%s %lf\n", "Outbount Signal Delay: ", ts);
+              }
           }
+          else
+            printf("\t\t No outgoing signals.\n");
+
           break;
         }
 
@@ -319,28 +435,38 @@ main(int argc, char **argv, char **env)
 {
   int i;
 
+// This is to generate the structural graph of the network
+
+  extern char edge_path[];
+  extern char vertex_path[];
+  extern struct Graph* graph;
+  extern struct Stim* stim;
+  graph = generate_graph(edge_path, vertex_path);
+  stim = generate_stim(stim_path);
+
+
   tw_opt_add(app_opt);
   tw_init(&argc, &argv);
 
   // nlp_per_pe /= (tw_nnodes() * g_tw_npe); // Vivek: commented this out and added next line
-        // nlp_per_pe = g_tw_nlp;
-        printf("\n %s%li\n", "Number of possible nodes: ", g_tw_nlp);
-        printf("\n\t\t%s %u\n", "Number of nodes/processors defined: ", tw_nnodes());
+  // nlp_per_pe = g_tw_nlp;
+  printf("\n %s%li\n", "Number of possible nodes: ", g_tw_nlp);
+  printf("\n\t\t%s %u\n", "Number of nodes/processors defined: ", tw_nnodes());
   g_tw_ts_end = 10; // Sets the simulation end time:w
-        printf("\n\t\t%s %lf\n", "Simulation end time: ", g_tw_ts_end);
+  printf("\n\t\t%s %lf\n", "Simulation end time: ", g_tw_ts_end);
 
-        g_tw_lookahead = lookahead;
+  g_tw_lookahead = lookahead;
 
   tw_define_lps(nlp_per_pe, sizeof(airport_message));
 
   for(i = 0; i < g_tw_nlp; i++)
-        {
-          tw_lp_settype(i, &airport_lps[0]);
-        }
+  {
+    tw_lp_settype(i, &airport_lps[0]);
+  }
 
-        printf("\n Start Simulation \n");
+  printf("\n Start Simulation \n");
   tw_run();
-        printf("\n End Simulation \n");
+  printf("\n End Simulation \n");
 
   if(tw_ismaster())
   {
@@ -348,7 +474,7 @@ main(int argc, char **argv, char **env)
     printf("\t%-50s %11.4lf\n", "Average Waiting Time", wait_time_avg);
 //    printf("\t%-50s %11lu\n", "Number of nodes",
 //      nlp_per_pe * g_tw_npe * tw_nnodes());
-                printf("\t%-50s %d\n", "ROSS do not print value ", ROSS_DO_NOT_PRINT);
+    printf("\t%-50s %d\n", "ROSS do not print value ", ROSS_DO_NOT_PRINT);
   }
 
   tw_end();
