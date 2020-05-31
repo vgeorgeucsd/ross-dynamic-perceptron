@@ -5,6 +5,8 @@
 // #include "generate_graph.h"
 
 #define ROSS_DO_NOT_PRINT 1
+#define activator_list_limit 10
+#define activator_list_parameters 3
 
 typedef enum airport_event_t airport_event_t;
 typedef struct airport_state airport_state;
@@ -26,12 +28,21 @@ struct airport_state
   tw_stime        remaining_refractory_period; // the time which remains in the nodes refractory period
   tw_stime        last_fired_time;
   tw_stime        last_evaluation_time;
+  tw_stime        current_time;
   // int             number_of_edge_parameters;
   int             number_of_outgoing_edges; // this is the number of outoging edges
   // tw_stime        **outgoing_edge_info;
   long int        *outgoing_edge_info_dst;
   tw_stime        *outgoing_edge_info_dly;
   tw_stime        *outgoing_edge_info_wgt;
+  int             num_activators;
+  tw_stime        activators_info[10][3];  // this is the list of activators when the node fires
+                                          // the number of rows is dependent on network parameters
+                                          // each row represents the information for an incoming signal
+                                          // 1st column represents source node
+                                          // 2nd column represents source activation time
+                                          // 3rd column represents source signal amplitude
+  // tw_stime        *outgoing_edge_info_amplitude;
 
   // tw_stime     outgoing_edge_info[5000][3]; // contains the gid of the outgoing edges,
                                                // the 1st dimension contains the destination lp
@@ -44,16 +55,18 @@ struct airport_state
 
 struct airport_message
 {
-  airport_event_t   type;
+  airport_event_t type;
 
-  tw_stime          previous_evaluation_time; // Reverse computation, last time the node was evaluated
-  double           node_activation_amplitude; // Amplitude of the node potential at node activation
+  tw_stime        previous_evaluation_time; // Reverse computation, last time the node was evaluated
+  double          node_activation_amplitude; // Amplitude of the node potential at node activation
   tw_stime        last_fired_time; // For reverse computation
+  double          edge_sig_amplitude;
   double          edge_weight;
   double          prev_remaining_refractory_period;
   double          prev_current_amplitude;
   tw_stime        prev_last_fired_time;
   int             signal_origin;
+  tw_stime        signal_origin_time;
 };
 
 // tw_stime lookahead = 0.00000001;

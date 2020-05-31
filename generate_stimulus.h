@@ -14,7 +14,7 @@ struct Stim {
 
 // A data structure to store adjacency list nodes of the graph
 struct StimNode {
-  long double weight,delay;
+  long double amplitude,delay;
   struct StimNode* next;
 };
 
@@ -32,12 +32,12 @@ struct Stim* createStim(FILE* reads, struct Stim* graph)
 
   // add edges to the directed graph one by one
   int src;
-  long double weight, delay;
-  while(fscanf(reads,"%d %Lf %Lf", &src, &weight, &delay)==StimParms)
+  long double amplitude, delay;
+  while(fscanf(reads,"%d %Lf %Lf", &src, &amplitude, &delay)==StimParms)
   {
     // allocate new node of Adjacency List from src
     struct StimNode* newNode = (struct StimNode*)malloc(sizeof(struct StimNode));
-    newNode->weight = weight;
+    newNode->amplitude = amplitude;
     newNode->delay = delay;
 
     // point new node to current head
@@ -45,7 +45,7 @@ struct Stim* createStim(FILE* reads, struct Stim* graph)
 
     // point head pointer to new node
     graph->head[src] = newNode;
-    printf("Reading Stim: %d (wgt: %Lf, dly: %Lf)\n", src, graph->head[src]->weight,graph->head[src]->delay);
+    printf("Reading Stim: %d (wgt: %Lf, dly: %Lf)\n", src, graph->head[src]->amplitude,graph->head[src]->delay);
   }
 
   return graph;
@@ -61,7 +61,7 @@ void printStim(struct Stim* graph)
     struct StimNode* ptr = graph->head[i];
     while (ptr != NULL)
     {
-      printf("%d (wgt: %Lf, dly: %Lf)\t", i, ptr->weight,ptr->delay);
+      printf("%d (wgt: %Lf, dly: %Lf)\t", i, ptr->amplitude,ptr->delay);
       ptr = ptr->next;
       k++;
     }
