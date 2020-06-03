@@ -83,7 +83,8 @@ init(airport_state * s, tw_lp * lp)
   else
   {
     s->outgoing_edge_info_dst = tw_calloc(TW_LOC,"oe_dest",sizeof(tw_stime *), s->number_of_outgoing_edges);
-    s->outgoing_edge_info_dly = tw_calloc(TW_LOC,"oe_dly",sizeof(tw_stime *), s->number_of_outgoing_edges);
+    s->outgoing_edge_info_dist = tw_calloc(TW_LOC,"oe_dist",sizeof(tw_stime *), s->number_of_outgoing_edges);
+    s->outgoing_edge_info_speed = tw_calloc(TW_LOC,"oe_speed",sizeof(tw_stime *), s->number_of_outgoing_edges);
     s->outgoing_edge_info_wgt = tw_calloc(TW_LOC,"oe_wgt",sizeof(tw_stime *), s->number_of_outgoing_edges);
     // s->outgoing_edge_info_amplitude = tw_calloc(TW_LOC,"oe_amp",sizeof(tw_stime *), s->number_of_outgoing_edges);
 
@@ -91,13 +92,14 @@ init(airport_state * s, tw_lp * lp)
     while (ptr1 != NULL)
     {
       s->outgoing_edge_info_dst[numOutEdges1] = ptr1->dest;
-      s->outgoing_edge_info_dly[numOutEdges1] = ptr1->delay;
+      s->outgoing_edge_info_dist[numOutEdges1] = ptr1->dist;
+      s->outgoing_edge_info_speed[numOutEdges1] = init_edge_speed;
       s->outgoing_edge_info_wgt[numOutEdges1] = ptr1->weight;
       // s->outgoing_edge_info_amplitude[numOutEdges1] = 0; // initial edge signal amplitude
       ptr1 = ptr1->next;
 
 #if VIVEK_DEBUG
-      printf("\tNode %li connected to Node %li Edge Delay : %f Edge Weight: %f \n", vertex, s->outgoing_edge_info_dst[numOutEdges1], s->outgoing_edge_info_dly[numOutEdges1], s->outgoing_edge_info_wgt[numOutEdges1]);
+      printf("\tNode %li connected to Node %li Edge Delay : %f Edge Weight: %f \n", vertex, s->outgoing_edge_info_dst[numOutEdges1], (s->outgoing_edge_info_dist[numOutEdges1])/(s->outgoing_edge_info_speed[numOutEdges1]), s->outgoing_edge_info_wgt[numOutEdges1]);
 #endif
       numOutEdges1++;
     }
@@ -277,12 +279,12 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
             for(i=0; i < s->number_of_outgoing_edges; i++)
               {
                 dst_lp  = s->outgoing_edge_info_dst[i];
-                ts      = s->outgoing_edge_info_dly[i];
+                ts      = s->outgoing_edge_info_dist[i]/s->outgoing_edge_info_speed[i];
                 e       = tw_event_new(dst_lp, ts, lp);
                 m       = tw_event_data(e);
                 m->signal_origin_time = s->last_fired_time;
                 m->type = ARRIVING;
-                m->edge_sig_amplitude = 1;
+                m->edge_sig_amplitude = outgoing_sig_amplitude;
                 m->edge_weight = s->outgoing_edge_info_wgt[i];
                 m->signal_origin = lp->gid;
                 tw_event_send(e);
@@ -332,16 +334,31 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
           printf("\t%s%li\n","Signal Target Node: ", msg->signal_current_node);
           printf("\t%s%f\n","Which Fired at Time: ", msg->last_fired_time);
 
+          tw_stime delta_t = msg->signal_origin_time - msg->last_fired_time;
+          tw_stime delta_change = stdp_delta_change_params_str_a * powl(M_E,delta_t/stdp_delta_change_params_str_b); //the first argument of powl is eulers number
+
+
           for(i=0; i < s->number_of_outgoing_edges; i++)
           {
             if(s->outgoing_edge_info_dst[i]==msg->signal_current_node)
             {
               printf("\t%s%lf\n","Old Edge Weight: ", s->outgoing_edge_info_wgt[i]);
-              // Modify the edge weight based on whatever rule
-              tw_stime delta_t = msg->signal_origin_time - msg->last_fired_time;
-              tw_stime delta_change = stdp_delta_change_params_str_a * powl(M_E,delta_t/stdp_delta_change_params_str_b); //the first argument of powl is eulers number
-              s->outgoing_edge_info_wgt[i] = update_edge_weight(delta_change,s->outgoing_edge_info_wgt[i]);
+              // Modify the edge weight by whatever rules
+              if(stdp_weight_switch)
+              {
+                s->outgoing_edge_info_wgt[i] = stdp_update_edge_parm(delta_change,s->outgoing_edge_info_wgt[i], 0); // for the weight stdp toggle
+              }
               printf("\t%s%lf\n","New Edge Weight: ", s->outgoing_edge_info_wgt[i]);
+
+              // Speed Modifications
+              printf("\t%s%lf\n","Old Edge Speed: ", s->outgoing_edge_info_speed[i]);
+              // Modify the edge speed by whatever rules
+              if(stdp_speed_switch)
+              {
+                s->outgoing_edge_info_speed[i] = stdp_update_edge_parm(delta_change,s->outgoing_edge_info_speed[i], 1); // 1 is for the speed stdp toggle
+              }
+              printf("\t%s%lf\n","New Edge Speed: ", s->outgoing_edge_info_speed[i]);
+
             }
           }
           break;
@@ -353,16 +370,27 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
           printf("\t%s%li\n","Signal Arrived From Node: ",msg->signal_origin);
           printf("\t%s%li\n","Signal Arrived To Node: ", msg->signal_current_node);
 
+          tw_stime delta_t = msg->signal_origin_time - msg->last_fired_time;
+          tw_stime delta_change = -1 * stdp_delta_change_params_weak_a * powl(M_E,delta_t/stdp_delta_change_params_weak_b); //the first argument of powl is eulers number
+
           for(i=0; i < s->number_of_outgoing_edges; i++)
           {
             if(s->outgoing_edge_info_dst[i]==msg->signal_current_node)
             {
               printf("\t%s%lf\n","Old Edge Weight: ", s->outgoing_edge_info_wgt[i]);
               // Modify the edge weight based on whatever rule
-              tw_stime delta_t = msg->signal_origin_time - msg->last_fired_time;
-              tw_stime delta_change = -1 * stdp_delta_change_params_weak_a * powl(M_E,delta_t/stdp_delta_change_params_weak_b); //the first argument of powl is eulers number
-              s->outgoing_edge_info_wgt[i] = update_edge_weight(delta_change,s->outgoing_edge_info_wgt[i]);
+              if(stdp_weight_switch)
+              {
+                s->outgoing_edge_info_wgt[i] = stdp_update_edge_parm(delta_change,s->outgoing_edge_info_wgt[i],0); // for the weight stdp toggle
+              }
               printf("\t%s%lf\n","New Edge Weight: ", s->outgoing_edge_info_wgt[i]);
+
+              printf("\t%s%lf\n","Old Edge Speed: ", s->outgoing_edge_info_speed[i]);
+              if(stdp_speed_switch)
+              {
+                s->outgoing_edge_info_speed[i] = stdp_update_edge_parm(delta_change,s->outgoing_edge_info_speed[i],1); // for the weight stdp toggle
+              }
+              printf("\t%s%lf\n","New Edge Speed: ", s->outgoing_edge_info_speed[i]);
             }
           }
 
@@ -535,28 +563,39 @@ main(int argc, char **argv, char **env)
   return 0;
 }
 
-tw_stime update_edge_weight(tw_stime delta_w, tw_stime edge_weight)
+tw_stime stdp_update_edge_parm(tw_stime delta_w, tw_stime edge_parm, int parm_option)
 {
   tw_stime update;
+  float stdp_parm_max, stdp_parm_min;
+
+  if(parm_option==0)
+  {
+    stdp_parm_max = stdp_weight_max;
+    stdp_parm_min = stdp_weight_min;
+  }
+  else if(parm_option==1)
+  {
+    stdp_parm_max = stdp_speed_max;
+    stdp_parm_min = stdp_speed_min;
+  }
   if(delta_w > 0)
   {
-    update = stdp_learning_rate * delta_w * (stdp_weight_max - edge_weight);
+    update = stdp_learning_rate * delta_w * (stdp_parm_max - edge_parm);
   }
   else
   {
-    update = stdp_learning_rate * delta_w * (edge_weight - stdp_weight_min);
+    update = stdp_learning_rate * delta_w * (edge_parm - stdp_parm_min);
   }
 
-  edge_weight += update;
+  edge_parm += update;
 
-  if(edge_weight < stdp_weight_min)
+  if(edge_parm < stdp_parm_min)
   {
-    edge_weight = stdp_weight_min;
+    edge_parm = stdp_parm_min;
   }
-  if(edge_weight > stdp_weight_max)
+  if(edge_parm > stdp_parm_max)
   {
-    edge_weight = stdp_weight_max;
+    edge_parm = stdp_parm_max;
   }
-  return edge_weight;
-
+  return edge_parm;
 }

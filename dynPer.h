@@ -34,7 +34,8 @@ struct airport_state
   int             number_of_outgoing_edges; // this is the number of outoging edges
   // tw_stime        **outgoing_edge_info;
   long int        *outgoing_edge_info_dst;
-  tw_stime        *outgoing_edge_info_dly;
+  tw_stime        *outgoing_edge_info_dist;
+  tw_stime        *outgoing_edge_info_speed;
   tw_stime        *outgoing_edge_info_wgt;
   int             num_activators;
   tw_stime        activators_info[maxActivatorsList][maxActivatorsParms];  // this is the list of activators when the node fires
@@ -78,6 +79,6 @@ tw_stime lookahead = 3;
 static tw_lpid	 nlp_per_pe = N; // Vivek: number of nodes
 static tw_stime	 wait_time_avg = 0.0;
 
-tw_stime update_edge_weight(tw_stime delta_t, tw_stime weight);
+tw_stime stdp_update_edge_parm(tw_stime delta_t, tw_stime parm, int parm_type);
 
 #endif

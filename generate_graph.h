@@ -15,7 +15,7 @@ struct Graph {
 // A data structure to store adjacency list nodes of the graph
 struct Node {
   int dest;
-  float weight,delay;
+  float weight,dist;
   int nid;
   float ref_per;
   float threshold;
@@ -49,21 +49,21 @@ struct Graph* createGraph(FILE* reads, struct Graph* graph)
   int src;
   int dest;
   float weight;
-  float delay;
-  while(fscanf(reads,"%d %d %f %f", &src, &dest, &weight, &delay)==EdgeParms)
+  float dist;
+  while(fscanf(reads,"%d %d %f %f", &src, &dest, &weight, &dist)==EdgeParms)
   {
     // allocate new node of Adjacency List from src to dest
     struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
     newNode->dest = dest;
     newNode->weight = weight;
-    newNode->delay = delay;
+    newNode->dist = dist;
 
     // point new node to current head
     newNode->next = graph->head[src];
 
     // point head pointer to new node
     graph->head[src] = newNode;
-    printf("Reading Edge: %d -> %d (wgt: %f, dly: %f)\n", src, graph->head[src]->dest, graph->head[src]->weight,graph->head[src]->delay);
+    printf("Reading Edge: %d -> %d (wgt: %f, dist: %f)\n", src, graph->head[src]->dest, graph->head[src]->weight,graph->head[src]->dist);
   }
 
   return graph;
@@ -88,9 +88,9 @@ struct Graph* addVertexInfo(FILE* reads, struct Graph* graph)
       newNode->threshold = threshold;
       newNode->dest = -1; // setting this to -1 so that we can indicate no outgoing edges
       newNode->weight = 0;
-      newNode->delay = 0;
+      newNode->dist = 0;
       graph->head[nid] = newNode;
-      printf("NID: %d, ref per: %f, thresh: %f, dest: %d, wgt: %f, dly: %f \n", graph->head[nid]->nid, graph->head[nid]->ref_per, graph->head[nid]->threshold, graph->head[nid]->dest, graph->head[nid]->weight,graph->head[nid]->delay);
+      printf("NID: %d, ref per: %f, thresh: %f, dest: %d, wgt: %f, dist: %f \n", graph->head[nid]->nid, graph->head[nid]->ref_per, graph->head[nid]->threshold, graph->head[nid]->dest, graph->head[nid]->weight,graph->head[nid]->dist);
     }
     else
     {
@@ -117,7 +117,7 @@ void printGraph(struct Graph* graph)
     struct Node* ptr = graph->head[i];
     while (ptr != NULL)
     {
-      printf("%d -> %d (wgt: %f, dly: %f)\t", i, ptr->dest, ptr->weight,ptr->delay);
+      printf("%d -> %d (wgt: %f, dist: %f)\t", i, ptr->dest, ptr->weight,ptr->dist);
       ptr = ptr->next;
       k++;
     }

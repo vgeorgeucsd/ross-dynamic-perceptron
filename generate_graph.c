@@ -15,7 +15,7 @@ struct Graph {
 // A data structure to store adjacency list nodes of the graph
 struct Node {
   int dest;
-  float delay,weight;
+  float dist,weight;
   int nid;
   float ref_per;
   float threshold;
@@ -38,14 +38,14 @@ struct Graph* createGraph(FILE* reads)
   int src;
   int dest;
   float weight;
-  float delay;
-  while(fscanf(reads,"%d %d %d %f", &src, &dest, &weight, &delay)==EdgeParms)
+  float dist;
+  while(fscanf(reads,"%d %d %d %f", &src, &dest, &weight, &dist)==EdgeParms)
   {
     // allocate new node of Adjacency List from src to dest
     struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
     newNode->dest = dest;
     newNode->weight = weight;
-    newNode->delay = delay;
+    newNode->dist = dist;
 
     // point new node to current head
     newNode->next = graph->head[src];
@@ -100,7 +100,7 @@ void printGraph(struct Graph* graph)
     struct Node* ptr = graph->head[i];
     while (ptr != NULL)
     {
-      printf("%d -> %d (wgt: %f, dly: %f)\t", i, ptr->dest, ptr->weight, ptr->delay);
+      printf("%d -> %d (wgt: %f, dly: %f)\t", i, ptr->dest, ptr->weight, ptr->dist);
       ptr = ptr->next;
     }
 
