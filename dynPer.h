@@ -2,11 +2,10 @@
 #define INC_dynPer_h
 
 #include <ross.h>
+#include "network_parameters.h"
 // #include "generate_graph.h"
 
 #define ROSS_DO_NOT_PRINT 1
-#define activator_list_limit 10
-#define activator_list_parameters 3
 
 typedef enum airport_event_t airport_event_t;
 typedef struct airport_state airport_state;
@@ -14,14 +13,16 @@ typedef struct airport_message airport_message;
 
 enum airport_event_t
 {
-	ARRIVING = 1,
-	DEPARTING,
-	DROPPING
+  ARRIVING = 1,
+  DEPARTING,
+  DROPPING,
+  STDP_STRONG, // stdp increase weight
+  STDP_WEAK    // stdp decrease weight
 };
 
 struct airport_state
 {
-  int             id; // node id
+  long int        id; // node id
   double          firing_threshold; // this is the threshold for node activations
   double          current_amplitude; // this is the current amplitude of the node
   double          max_refractory_period; // length of the refractory periods
@@ -36,7 +37,7 @@ struct airport_state
   tw_stime        *outgoing_edge_info_dly;
   tw_stime        *outgoing_edge_info_wgt;
   int             num_activators;
-  tw_stime        activators_info[10][3];  // this is the list of activators when the node fires
+  tw_stime        activators_info[maxActivatorsList][maxActivatorsParms];  // this is the list of activators when the node fires
                                           // the number of rows is dependent on network parameters
                                           // each row represents the information for an incoming signal
                                           // 1st column represents source node
@@ -65,14 +66,18 @@ struct airport_message
   double          prev_remaining_refractory_period;
   double          prev_current_amplitude;
   tw_stime        prev_last_fired_time;
-  int             signal_origin;
-  tw_stime        signal_origin_time;
+  long int        signal_origin; // node id of the source signal
+  tw_stime        signal_origin_time;  // time of firing of source node
+  tw_stime        stdp_current_time;
+  long int        signal_current_node; // node which is activated by the signal
 };
 
 // tw_stime lookahead = 0.00000001;
 tw_stime lookahead = 3;
 // static tw_stime lookahead = 0;
-static tw_lpid	 nlp_per_pe = 793; // Vivek: number of nodes
+static tw_lpid	 nlp_per_pe = N; // Vivek: number of nodes
 static tw_stime	 wait_time_avg = 0.0;
+
+tw_stime update_edge_weight(tw_stime delta_t, tw_stime weight);
 
 #endif

@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "network_parameters.h"
 // Define maximum number of vertices in the graph
-#define N 793
-#define EdgeParms 4
-#define VertexParms 3
+// #define N 3
+// #define EdgeParms 4
+// #define VertexParms 3
 
 // Data structure to store graph
 struct Graph {

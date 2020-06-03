@@ -1,15 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
-// #include <ross.h>
+#include "network_parameters.h"
 
 // Define maximum number of vertices in the graph
-#define S 793
-#define StimParms 3
+// #define N 793
 
 // Data structure to store graph
 struct Stim {
   // An array of pointers to Node to represent adjacency list
-  struct StimNode* head[S];
+  struct StimNode* head[N];
 };
 
 // A data structure to store adjacency list nodes of the graph
@@ -25,7 +24,7 @@ struct Stim* createStim(FILE* reads, struct Stim* graph)
 
 
   // initialize head pointer for all vertices
-  for (i = 0; i < S; i++)
+  for (i = 0; i < N; i++)
   {
       graph->head[i] = NULL;
   }
@@ -45,7 +44,7 @@ struct Stim* createStim(FILE* reads, struct Stim* graph)
 
     // point head pointer to new node
     graph->head[src] = newNode;
-    printf("Reading Stim: %d (wgt: %Lf, dly: %Lf)\n", src, graph->head[src]->amplitude,graph->head[src]->delay);
+    printf("Reading Stim: %d (amplitude: %Lf, dly: %Lf)\n", src, graph->head[src]->amplitude,graph->head[src]->delay);
   }
 
   return graph;
@@ -55,7 +54,7 @@ struct Stim* createStim(FILE* reads, struct Stim* graph)
 void printStim(struct Stim* graph)
 {
   int i,k=0;
-  for (i = 0; i < S; i++)
+  for (i = 0; i < N; i++)
   {
     // print current vertex and all ts neighbors
     struct StimNode* ptr = graph->head[i];
@@ -87,7 +86,7 @@ struct Stim* generate_stim(char stim_path[])
   }
   else
   {
-    printf("Found edge input file \n");
+    printf("Found stim input file \n");
     // construct graph from given edges
     graph_int = createStim(reads,graph_int);
     fclose(reads);

@@ -1,9 +1,10 @@
 #include "dynPer.h"
 #include "generate_graph.h"
 #include "generate_stimulus.h"
+#include "network_parameters.h"
 #include <math.h>
 
-#define VIVEK_DEBUG 0
+#define VIVEK_DEBUG 1
 /*
   dynPer.c
   Dynamic Perceptron simulator
@@ -11,9 +12,13 @@
   Vivek George
 */
 
-char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_input.793";
-char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_input.793";
-char stim_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/stim_input.74.5";
+// char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_input.793";
+// char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_input.793";
+// char stim_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/stim_input.74.5";
+char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_input.original";
+char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_input.original";
+char stim_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/stim_input.original";
+
 //struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
 struct Graph* graph;
 struct Stim* stim;
@@ -46,8 +51,8 @@ init(airport_state * s, tw_lp * lp)
   int numOutEdges1=0;
 
   // Initialize the activators information
-  for(int i=0;i<10;i++)
-    for(int j=0;j<3;j++)
+  for(int i=0;i<maxActivatorsList;i++)
+    for(int j=0;j<maxActivatorsParms;j++)
       s->activators_info[i][j]=-1;
   // End initializing activators information
 
@@ -68,6 +73,7 @@ init(airport_state * s, tw_lp * lp)
   printf("Node %li Parameters:\n",vertex);
   printf("\tNumber of outgoing edges: %d\n", numOutEdges);
 #endif
+
   s->number_of_outgoing_edges = numOutEdges;
   if(s->number_of_outgoing_edges == 0 || graph->head[vertex]->dest == -1 )
   {
@@ -89,11 +95,11 @@ init(airport_state * s, tw_lp * lp)
       s->outgoing_edge_info_wgt[numOutEdges1] = ptr1->weight;
       // s->outgoing_edge_info_amplitude[numOutEdges1] = 0; // initial edge signal amplitude
       ptr1 = ptr1->next;
-      numOutEdges1++;
 
 #if VIVEK_DEBUG
-      printf("\tNode %li to Node %li Edge Delay : %f Edge Weight: %f \n", vertex, s->outgoing_edge_info_dst[numOutEdges1], s->outgoing_edge_info_dly[numOutEdges1], s->outgoing_edge_info_wgt[numOutEdges1]);
+      printf("\tNode %li connected to Node %li Edge Delay : %f Edge Weight: %f \n", vertex, s->outgoing_edge_info_dst[numOutEdges1], s->outgoing_edge_info_dly[numOutEdges1], s->outgoing_edge_info_wgt[numOutEdges1]);
 #endif
+      numOutEdges1++;
     }
   }
 
@@ -112,8 +118,8 @@ init(airport_state * s, tw_lp * lp)
       m = tw_event_data(e);
       m->type = ARRIVING;
       m->edge_sig_amplitude = stimPtr->amplitude;
+      m->edge_weight = 1;
       tw_event_send(e);
-      stimPtr = stimPtr->next;
 #if VIVEK_DEBUG
       printf("Stimulus nid: %li\n",vertex);
       printf("Stimulus Amplitude: %Lf\n",stimPtr->amplitude);
@@ -121,6 +127,7 @@ init(airport_state * s, tw_lp * lp)
       printf("created new event\n");
       printf("created new message of event\n");
 #endif
+      stimPtr = stimPtr->next;
     }
 
 }
@@ -146,7 +153,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
           sig_diff = s->current_time - s->last_fired_time;
 #if VIVEK_DEBUG
           printf("\t%s %li\n", "Signal Arrived to Node: ", lp->gid);
-          printf("\t%s %i\n", "Signal Arrived from Node: ", msg->signal_origin);
+          printf("\t%s %li\n", "Signal Arrived from Node: ", msg->signal_origin);
           printf("\t\t%s %lf\n", "At Time: ", s->current_time);
           printf("\t\t%s %lf\n", "Node Last Fired At: ", s->last_fired_time);
           printf("\t\t%s %lf\n", "Signal Difference: ", sig_diff);
@@ -160,6 +167,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
             s->activators_info[s->num_activators][0] = msg->signal_origin;
             s->activators_info[s->num_activators][1] = msg->signal_origin_time;
             s->activators_info[s->num_activators][2] = msg->edge_sig_amplitude;
+            s->activators_info[s->num_activators][3] = s->current_time;
             s->num_activators++;
             //end keepig track of activators list
 
@@ -192,14 +200,29 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
               printf("\t\t Activators List Info: \n");
               for (i=0; i<s->num_activators ; i++)
               {
-                printf("\t\t Target Node: %i, Target Node Act Time: %lf, Source Node: %lf, Source Activation Time: %lf, Source Signal Amplitude: %lf\n", s->id, s->last_evaluation_time, s->activators_info[i][0],s->activators_info[i][1],s->activators_info[i][2]);
+                printf("\t\t Target Node: %li, Target Node Act Time: %lf, Source Node: %lf, Source Activation Time: %lf, Source Signal Amplitude: %lf, Source Signal Arrival Time: %lf\n", s->id, s->last_evaluation_time, s->activators_info[i][0],s->activators_info[i][1],s->activators_info[i][2], s->activators_info[i][3]);
+
+                // Sending STDP signals for strengthening edge weight
+                e = tw_event_new(s->activators_info[i][0], 0 ,lp);
+                m = tw_event_data(e);
+                m->type = STDP_STRONG;
+                m->signal_origin = s->activators_info[i][0];
+                m->signal_origin_time = s->activators_info[i][1];
+                m->last_fired_time = s->current_time; // this is when the target vertex fired
+                m->signal_current_node = lp->gid;  // sends the activated nodes id
+                tw_event_send(e);
+
+                // End STDP code
+
                 // Setting back the activators list to the initialized values after firing
-                for(int j=0; j<3;j++)
+                for(int j=0; j<maxActivatorsParms ; j++)
                 {
                   s->activators_info[i][j]=-1;
                 }
               }
               s->num_activators = 0; // clear the number of activators
+
+              // Getting message ready for sending singals to outgoing edges
               e = tw_event_new(lp->gid, 0 ,lp);
               m = tw_event_data(e);
               m->type = DEPARTING;
@@ -207,16 +230,19 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
               m->node_activation_amplitude = s->current_amplitude;
               m->prev_current_amplitude = msg->prev_current_amplitude;
               tw_event_send(e);
+
             }
           }
           else
           {
             // else drop the packet
+
+#if VIVEK_DEBUG
             // Print dropped Signal information
             printf("\t\t Dropped Signal Information: \n");
-            printf("\t\t Target Node: %i, Target Node Act Time: %lf, Source Node: %i, Source Activation Time: %lf, Source Signal Amplitude: %lf\n", s->id, s->last_evaluation_time, msg->signal_origin,msg->signal_origin_time,msg->edge_sig_amplitude);
+            printf("\t\t Target Node: %li, Target Node Act Time: %lf, Source Node: %li, Source Activation Time: %lf, Source Signal Amplitude: %lf\n", s->id, s->last_evaluation_time, msg->signal_origin,msg->signal_origin_time,msg->edge_sig_amplitude);
             // end dropped signal information
-
+#endif
 
             // e = tw_event_new(lp->gid, tw_now(lp), lp);
             e = tw_event_new(lp->gid, 0 ,lp);
@@ -224,8 +250,10 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
             m->type = DROPPING;
             m->last_fired_time = s->last_fired_time;
             m->signal_origin = msg->signal_origin;
+            m->signal_origin_time = msg->signal_origin_time;
             m->prev_remaining_refractory_period = s->remaining_refractory_period;
             tw_event_send(e);
+
           }
           break;
         }
@@ -234,7 +262,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
         {
 #if VIVEK_DEBUG
           printf("\t%s %li\n", "Node Fired ID: ", lp->gid);
-          // printf("\t%s %i\n", "Node ID Fired: ", s->id);
+          // printf("\t%s %li\n", "Node ID Fired: ", s->id);
           printf("\t\t%s %11.11lf\n", "At Time: ", s->current_time);
 #endif
           msg->prev_current_amplitude = s->current_amplitude;
@@ -279,13 +307,68 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
           s->current_amplitude = 0;
 #if VIVEK_DEBUG
           printf("\n\n \t Node Refractory, Dropped Packet\n");
-          printf("\t%s %li\n", "Node Droping Signal ID: ", lp->gid);
-          printf("\t%s %i\n", "Signal Arrived from Node: ", msg->signal_origin);
+          printf("\t%s %li\n", "ID of Node Droping Signal: ", lp->gid);
+          printf("\t%s %li\n", "Signal Arrived from Node: ", msg->signal_origin);
           printf("\t\t%s %11.11lf\n", "Remaining Refractory Period: ", s->remaining_refractory_period);
-          printf("\t%s %i\n", "Signal Arrived from Node: ", msg->signal_origin);
 #endif
+          // Sending STDP signals for weakening edge weight
+          e = tw_event_new(msg->signal_origin, 0 ,lp);
+          m = tw_event_data(e);
+          m->type = STDP_WEAK;
+          m->signal_origin = msg->signal_origin;
+          m->signal_origin_time = msg->signal_origin_time;
+          m->stdp_current_time = s->current_time; // this is when the target vertex fired
+          m->signal_current_node = lp->gid;
+          tw_event_send(e);
+          // End STDP code
+
           break;
         }
+      case STDP_STRONG:
+        {
+          printf("\n\t%s\n\n", "Doing STDP Weight Increase");
+          printf("\t%s%li\n","Signal Source Node: ",msg->signal_origin);
+          printf("\t%s%f\n","Which Fired at Time: ",msg->signal_origin_time);
+          printf("\t%s%li\n","Signal Target Node: ", msg->signal_current_node);
+          printf("\t%s%f\n","Which Fired at Time: ", msg->last_fired_time);
+
+          for(i=0; i < s->number_of_outgoing_edges; i++)
+          {
+            if(s->outgoing_edge_info_dst[i]==msg->signal_current_node)
+            {
+              printf("\t%s%lf\n","Old Edge Weight: ", s->outgoing_edge_info_wgt[i]);
+              // Modify the edge weight based on whatever rule
+              tw_stime delta_t = msg->signal_origin_time - msg->last_fired_time;
+              tw_stime delta_change = stdp_delta_change_params_str_a * powl(M_E,delta_t/stdp_delta_change_params_str_b); //the first argument of powl is eulers number
+              s->outgoing_edge_info_wgt[i] = update_edge_weight(delta_change,s->outgoing_edge_info_wgt[i]);
+              printf("\t%s%lf\n","New Edge Weight: ", s->outgoing_edge_info_wgt[i]);
+            }
+          }
+          break;
+        }
+
+      case STDP_WEAK:
+        {
+          printf("\n\t%s\n\n", "Doing STDP Weight Decrease");
+          printf("\t%s%li\n","Signal Arrived From Node: ",msg->signal_origin);
+          printf("\t%s%li\n","Signal Arrived To Node: ", msg->signal_current_node);
+
+          for(i=0; i < s->number_of_outgoing_edges; i++)
+          {
+            if(s->outgoing_edge_info_dst[i]==msg->signal_current_node)
+            {
+              printf("\t%s%lf\n","Old Edge Weight: ", s->outgoing_edge_info_wgt[i]);
+              // Modify the edge weight based on whatever rule
+              tw_stime delta_t = msg->signal_origin_time - msg->last_fired_time;
+              tw_stime delta_change = -1 * stdp_delta_change_params_weak_a * powl(M_E,delta_t/stdp_delta_change_params_weak_b); //the first argument of powl is eulers number
+              s->outgoing_edge_info_wgt[i] = update_edge_weight(delta_change,s->outgoing_edge_info_wgt[i]);
+              printf("\t%s%lf\n","New Edge Weight: ", s->outgoing_edge_info_wgt[i]);
+            }
+          }
+
+          break;
+        }
+
       }
 }
 
@@ -301,7 +384,7 @@ rc_event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * l
 #if VIVEK_DEBUG
       printf("\n %s \n", "DOING REVERSE COMPUTATION ARRIVING");
 
-      printf("\t%s %d\n", "Current node: ", s->id);
+      printf("\t%s %li\n", "Current node: ", s->id);
       printf("\t\t%s %lf\n", "At Time: ", tw_now(lp));
 
       printf("\t%s %lf\n", "Last eval time: ", s->last_evaluation_time);
@@ -322,7 +405,7 @@ rc_event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * l
 #if VIVEK_DEBUG
       printf("\n %s \n", "DOING REVERSE COMPUTATION DEPARTING");
 
-      printf("\t%s %d\n", "Current node: ", s->id);
+      printf("\t%s %li\n", "Current node: ", s->id);
       printf("\t\t%s %lf\n", "At Time: ", tw_now(lp));
 
       printf("\t%s %lf\n", "Last eval time: ", s->last_evaluation_time);
@@ -342,10 +425,10 @@ rc_event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * l
 #if VIVEK_DEBUG
       printf("\n %s \n", "DOING REVERSE COMPUTATION DROPPING");
 
-      printf("\t%s %d\n", "Current node: ", s->id);
+      printf("\t%s %li\n", "Current node: ", s->id);
       printf("\t\t%s %lf\n", "At Time: ", tw_now(lp));
 
-      printf("\t%s %i\n", "Signal Arrived from Node: ", msg->signal_origin);
+      printf("\t%s %li\n", "Signal Arrived from Node: ", msg->signal_origin);
 
       printf("\t%s %lf\n", "Current Amplitude: ", s->current_amplitude);
       printf("\t%s %lf\n\n", "Previous Amplitude: ", msg->prev_current_amplitude);
@@ -357,6 +440,16 @@ rc_event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * l
       s->remaining_refractory_period = msg->prev_remaining_refractory_period;
       s->current_amplitude = msg->prev_current_amplitude;
       break;
+
+    case STDP_STRONG:
+    {
+      break;
+    }
+
+    case STDP_WEAK:
+    {
+      break;
+    }
   }
   return;
 }
@@ -389,6 +482,7 @@ const tw_optdef app_opt [] =
   TWOPT_END()
 };
 
+// declarations of some functions used by the simulator
 int
 main(int argc, char **argv, char **env)
 {
@@ -411,7 +505,7 @@ main(int argc, char **argv, char **env)
   // nlp_per_pe = g_tw_nlp;
   printf("\n %s%li\n", "Number of possible nodes: ", g_tw_nlp);
   printf("\n\t\t%s %u\n", "Number of nodes/processors defined: ", tw_nnodes());
-  g_tw_ts_end = 10; // Sets the simulation end time:w
+  g_tw_ts_end = simTimeLimit; // Sets the simulation end time:w
   printf("\n\t\t%s %lf\n", "Simulation end time: ", g_tw_ts_end);
 
   g_tw_lookahead = lookahead;
@@ -439,4 +533,30 @@ main(int argc, char **argv, char **env)
   tw_end();
 
   return 0;
+}
+
+tw_stime update_edge_weight(tw_stime delta_w, tw_stime edge_weight)
+{
+  tw_stime update;
+  if(delta_w > 0)
+  {
+    update = stdp_learning_rate * delta_w * (stdp_weight_max - edge_weight);
+  }
+  else
+  {
+    update = stdp_learning_rate * delta_w * (edge_weight - stdp_weight_min);
+  }
+
+  edge_weight += update;
+
+  if(edge_weight < stdp_weight_min)
+  {
+    edge_weight = stdp_weight_min;
+  }
+  if(edge_weight > stdp_weight_max)
+  {
+    edge_weight = stdp_weight_max;
+  }
+  return edge_weight;
+
 }
