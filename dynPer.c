@@ -3,8 +3,8 @@
 #include "generate_stimulus.h"
 #include "network_parameters.h"
 #include <math.h>
-
-#define VIVEK_DEBUG 1
+#include <stdio.h>
+#include <string.h>
 /*
   dynPer.c
   Dynamic Perceptron simulator
@@ -18,6 +18,7 @@
 char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_input.original";
 char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_input.original";
 char stim_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/stim_input.original";
+char output_dir[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/temp_outputs/";
 
 //struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
 struct Graph* graph;
@@ -93,14 +94,27 @@ init(airport_state * s, tw_lp * lp)
     {
       s->outgoing_edge_info_dst[numOutEdges1] = ptr1->dest;
       s->outgoing_edge_info_dist[numOutEdges1] = ptr1->dist;
-      s->outgoing_edge_info_speed[numOutEdges1] = init_edge_speed;
+      s->outgoing_edge_info_speed[numOutEdges1] = INIT_EDGE_SPEED;
       s->outgoing_edge_info_wgt[numOutEdges1] = ptr1->weight;
       // s->outgoing_edge_info_amplitude[numOutEdges1] = 0; // initial edge signal amplitude
       ptr1 = ptr1->next;
 
-#if VIVEK_DEBUG
-      printf("\tNode %li connected to Node %li Edge Delay : %f Edge Weight: %f \n", vertex, s->outgoing_edge_info_dst[numOutEdges1], (s->outgoing_edge_info_dist[numOutEdges1])/(s->outgoing_edge_info_speed[numOutEdges1]), s->outgoing_edge_info_wgt[numOutEdges1]);
+      printf("\tNode %li connected to Node %li Edge Speed : %f Edge Weight: %f Current Time: 0\n", vertex, s->outgoing_edge_info_dst[numOutEdges1], (s->outgoing_edge_info_dist[numOutEdges1])/(s->outgoing_edge_info_speed[numOutEdges1]), s->outgoing_edge_info_wgt[numOutEdges1]);
+
+#if printEdgeValues
+      char bufferStimEdge[STRING_SIZE_OF_NODE_IDS];
+      snprintf(bufferStimEdge, sizeof bufferStimEdge, "%li",s->id);
+      char outFilePathStimEdgeVal[OUTPUT_FILENAME_LENGTH];
+      strcpy(outFilePathStimEdgeVal,output_dir);
+      strcat(outFilePathStimEdgeVal,"edge_weights");
+      strcat(outFilePathStimEdgeVal,bufferStimEdge);
+      strcat(outFilePathStimEdgeVal,".out");
+      FILE *edgeValfp = fopen(outFilePathStimEdgeVal, "a");
+
+      fprintf(edgeValfp,"Node %li connected to Node %li Edge Speed : %f Edge Weight: %f Current Time: 0.0 \n", vertex, s->outgoing_edge_info_dst[numOutEdges1], (s->outgoing_edge_info_dist[numOutEdges1])/(s->outgoing_edge_info_speed[numOutEdges1]), s->outgoing_edge_info_wgt[numOutEdges1]);
+      fclose(edgeValfp); // closing the file after the writes
 #endif
+
       numOutEdges1++;
     }
   }
@@ -197,12 +211,30 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
             if(s->current_amplitude >= s->firing_threshold)
             {
 
-              // e = tw_event_new(lp->gid, tw_now(lp), lp);
               // Printing out the activators inforamtion
+#if printActivatorList
+              // File printing inforamtion
+              char bufferArrivalVert[STRING_SIZE_OF_NODE_IDS];
+              snprintf(bufferArrivalVert, sizeof bufferArrivalVert, "%li",s->id);
+              char outFilePath[OUTPUT_FILENAME_LENGTH];
+              strcpy(outFilePath,output_dir);
+              strcat(outFilePath,"act_list_");
+              strcat(outFilePath,bufferArrivalVert);
+              strcat(outFilePath,".out");
+              FILE *fp = fopen(outFilePath, "a");
+              // FILE *fp = fopen("/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/testOutput.out", "a");
+              printf("\t\t Writing to File: %s\n", outFilePath);
+#endif
+              // End setting p the File printing information
               printf("\t\t Activators List Info: \n");
               for (i=0; i<s->num_activators ; i++)
               {
                 printf("\t\t Target Node: %li, Target Node Act Time: %lf, Source Node: %lf, Source Activation Time: %lf, Source Signal Amplitude: %lf, Source Signal Arrival Time: %lf\n", s->id, s->last_evaluation_time, s->activators_info[i][0],s->activators_info[i][1],s->activators_info[i][2], s->activators_info[i][3]);
+
+#if printActivatorList
+                // fprintf(fp,"This is a test\n");
+                fprintf(fp,"Target Node: %li, Target Node Act Time: %lf, Source Node: %lf, Source Activation Time: %lf, Source Signal Amplitude: %lf, Source Signal Arrival Time: %lf\n", s->id, s->last_evaluation_time, s->activators_info[i][0],s->activators_info[i][1],s->activators_info[i][2], s->activators_info[i][3]);
+#endif
 
                 // Sending STDP signals for strengthening edge weight
                 e = tw_event_new(s->activators_info[i][0], 0 ,lp);
@@ -222,6 +254,10 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
                   s->activators_info[i][j]=-1;
                 }
               }
+#if printActivatorList
+              fclose(fp); // closing the file after the writes
+#endif
+
               s->num_activators = 0; // clear the number of activators
 
               // Getting message ready for sending singals to outgoing edges
@@ -319,7 +355,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
           m->type = STDP_WEAK;
           m->signal_origin = msg->signal_origin;
           m->signal_origin_time = msg->signal_origin_time;
-          m->stdp_current_time = s->current_time; // this is when the target vertex fired
+          m->last_fired_time = s->current_time; // this is when the target vertex fired
           m->signal_current_node = lp->gid;
           tw_event_send(e);
           // End STDP code
@@ -358,7 +394,20 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
                 s->outgoing_edge_info_speed[i] = stdp_update_edge_parm(delta_change,s->outgoing_edge_info_speed[i], 1); // 1 is for the speed stdp toggle
               }
               printf("\t%s%lf\n","New Edge Speed: ", s->outgoing_edge_info_speed[i]);
+              printf("Node %li connected to Node %li Edge Speed : %f Edge Weight: %f Current Time: %lf \n", msg->signal_origin, msg->signal_current_node, s->outgoing_edge_info_speed[i], s->outgoing_edge_info_wgt[i], msg->last_fired_time);
+#if printEdgeValues
+              char bufferEdgeSTDPStrong[STRING_SIZE_OF_NODE_IDS];
+              snprintf(bufferEdgeSTDPStrong, sizeof bufferEdgeSTDPStrong, "%li",s->id);
+              char outFilePathEdgeSTDPStrong[OUTPUT_FILENAME_LENGTH];
+              strcpy(outFilePathEdgeSTDPStrong,output_dir);
+              strcat(outFilePathEdgeSTDPStrong,"edge_weights");
+              strcat(outFilePathEdgeSTDPStrong,bufferEdgeSTDPStrong);
+              strcat(outFilePathEdgeSTDPStrong,".out");
+              FILE *fpEdgeSTDPStrong = fopen(outFilePathEdgeSTDPStrong, "a");
 
+              fprintf(fpEdgeSTDPStrong,"Node %li connected to Node %li Edge Speed : %f Edge Weight: %f Current Time: %f \n", msg->signal_origin, msg->signal_current_node, s->outgoing_edge_info_speed[i], s->outgoing_edge_info_wgt[i], msg->last_fired_time);
+              fclose(fpEdgeSTDPStrong); // closing the file after the writes
+#endif
             }
           }
           break;
@@ -367,8 +416,10 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
       case STDP_WEAK:
         {
           printf("\n\t%s\n\n", "Doing STDP Weight Decrease");
-          printf("\t%s%li\n","Signal Arrived From Node: ",msg->signal_origin);
-          printf("\t%s%li\n","Signal Arrived To Node: ", msg->signal_current_node);
+          printf("\t%s%li\n","Signal Source Node: ",msg->signal_origin);
+          printf("\t%s%f\n","Which Fired at Time: ",msg->signal_origin_time);
+          printf("\t%s%li\n","Signal Target Node: ", msg->signal_current_node);
+          printf("\t%s%f\n","Which Fired at Time: ", msg->last_fired_time);
 
           tw_stime delta_t = msg->signal_origin_time - msg->last_fired_time;
           tw_stime delta_change = -1 * stdp_delta_change_params_weak_a * powl(M_E,delta_t/stdp_delta_change_params_weak_b); //the first argument of powl is eulers number
@@ -391,6 +442,20 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
                 s->outgoing_edge_info_speed[i] = stdp_update_edge_parm(delta_change,s->outgoing_edge_info_speed[i],1); // for the weight stdp toggle
               }
               printf("\t%s%lf\n","New Edge Speed: ", s->outgoing_edge_info_speed[i]);
+#if printEdgeValues
+              char bufferEdgeSTDPWeak[STRING_SIZE_OF_NODE_IDS];
+              snprintf(bufferEdgeSTDPWeak, sizeof bufferEdgeSTDPWeak, "%li",s->id);
+              char outFilePathEdgeSTDPWeak[OUTPUT_FILENAME_LENGTH];
+              strcpy(outFilePathEdgeSTDPWeak,output_dir);
+              strcat(outFilePathEdgeSTDPWeak,"edge_weights");
+              strcat(outFilePathEdgeSTDPWeak,bufferEdgeSTDPWeak);
+              strcat(outFilePathEdgeSTDPWeak,".out");
+              FILE *fpEdgeSTDPWeak = fopen(outFilePathEdgeSTDPWeak, "a");
+
+              fprintf(fpEdgeSTDPWeak,"Node %li connected to Node %li Edge Speed : %f Edge Weight: %f Current Time: %f\n", msg->signal_origin, msg->signal_current_node, s->outgoing_edge_info_speed[i], s->outgoing_edge_info_wgt[i], msg->last_fired_time);
+              fclose(fpEdgeSTDPWeak); // closing the file after the writes
+#endif
+
             }
           }
 

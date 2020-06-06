@@ -69,7 +69,6 @@ struct airport_message
   tw_stime        prev_last_fired_time;
   long int        signal_origin; // node id of the source signal
   tw_stime        signal_origin_time;  // time of firing of source node
-  tw_stime        stdp_current_time;
   long int        signal_current_node; // node which is activated by the signal
 };
 
