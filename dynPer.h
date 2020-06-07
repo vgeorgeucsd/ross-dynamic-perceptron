@@ -2,7 +2,7 @@
 #define INC_dynPer_h
 
 #include <ross.h>
-#include "network_parameters.h"
+#include "network_parameters_TOTALNUMBEROFNODES.h"
 // #include "generate_graph.h"
 
 #define ROSS_DO_NOT_PRINT 1

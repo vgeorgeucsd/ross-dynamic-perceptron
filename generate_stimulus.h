@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "network_parameters.h"
+#include "network_parameters_TOTALNUMBEROFNODES.h"
 
 // Define maximum number of vertices in the graph
 // #define N 793

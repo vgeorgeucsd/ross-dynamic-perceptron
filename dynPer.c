@@ -1,7 +1,7 @@
-#include "dynPer.h"
-#include "generate_graph.h"
-#include "generate_stimulus.h"
-#include "network_parameters.h"
+#include "dynPer_TOTALNUMBEROFNODES.h"
+#include "generate_graph_TOTALNUMBEROFNODES.h"
+#include "generate_stimulus_TOTALNUMBEROFNODES.h"
+#include "network_parameters_TOTALNUMBEROFNODES.h"
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,15 +14,15 @@
 
 // char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_input.793";
 // char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_input.793";
-// char stim_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/stim_input.74.5";
-char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_input.original";
-char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_input.original";
-char stim_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/stim_input.original";
+char stim_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/stim_input.74.5";
+// char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_input.original";
+// char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_input.original";
+// char stim_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/stim_input.original";
 // char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_info_source_200.out";
 // char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_info_source_200.out";
 
-// char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_info_source_TOTALNUMBEROFNODES.out";
-// char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_info_source_TOTALNUMBEROFNODES.out";
+char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_info_source_TOTALNUMBEROFNODES.out";
+char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_info_source_TOTALNUMBEROFNODES.out";
 char output_dir[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/temp_outputs/";
 
 //struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
@@ -618,7 +618,7 @@ main(int argc, char **argv, char **env)
   // nlp_per_pe = g_tw_nlp;
   printf("\n %s%li\n", "Number of possible nodes: ", g_tw_nlp);
   printf("\n\t\t%s %u\n", "Number of nodes/processors defined: ", tw_nnodes());
-  g_tw_ts_end = SIMTIMELIMIT; // Sets the simulation end time:w
+  g_tw_ts_end = SIM_TIME_LIMIT; // Sets the simulation end time:w
   printf("\n\t\t%s %lf\n", "Simulation end time: ", g_tw_ts_end);
   printf("\tEvents Per Processing Element: %d\n",g_tw_events_per_pe);
 

@@ -1,11 +1,11 @@
 // #define N 1288
 // #define N 838
 // #define N 988
-#define N 3
+#define N TOTALNUMBEROFNODES // this is set by the bash script
 #define EdgeParms 4
 #define VertexParms 3
 #define StimParms 3
-#define SIMTIMELIMIT 10
+#define SIM_TIME_LIMIT 10
 #define maxActivatorsList 100
 #define maxActivatorsParms 4
 // Network dynamics parameters
