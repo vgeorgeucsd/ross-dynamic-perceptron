@@ -30,13 +30,14 @@ struct airport_state
   tw_stime        last_fired_time;
   tw_stime        last_evaluation_time;
   tw_stime        current_time;
+  tw_stime        state_delta_t;
   // int             number_of_edge_parameters;
   int             number_of_outgoing_edges; // this is the number of outoging edges
   // tw_stime        **outgoing_edge_info;
   long int        *outgoing_edge_info_dst;
   tw_stime        *outgoing_edge_info_dist;
   tw_stime        *outgoing_edge_info_speed;
-  tw_stime        *outgoing_edge_info_wgt;
+  tw_stime        *outgoing_edge_info_weight;
   int             num_activators;
   tw_stime        activators_info[maxActivatorsList][maxActivatorsParms];  // this is the list of activators when the node fires
                                           // the number of rows is dependent on network parameters
@@ -64,18 +65,23 @@ struct airport_message
   tw_stime        last_fired_time; // For reverse computation
   double          edge_sig_amplitude;
   double          edge_weight;
+  double          edge_speed;
   double          prev_remaining_refractory_period;
   double          prev_current_amplitude;
   tw_stime        prev_last_fired_time;
   long int        signal_origin; // node id of the source signal
   tw_stime        signal_origin_time;  // time of firing of source node
   long int        signal_current_node; // node which is activated by the signal
+  tw_stime        prev_edge_weight; // this is for the reverse computation
+  tw_stime        prev_edge_speed; // this is for the reverse computation
+
 };
 
 // tw_stime lookahead = 0.00000001;
 tw_stime lookahead = 3;
 // static tw_stime lookahead = 0;
-static tw_lpid	 nlp_per_pe = N; // Vivek: number of nodes
+// static tw_lpid	 nlp_per_pe = N; // Vivek: number of nodes
+static tw_lpid	 nlp_per_pe = 3; // Vivek: number of nodes
 static tw_stime	 wait_time_avg = 0.0;
 
 tw_stime stdp_update_edge_parm(tw_stime delta_t, tw_stime parm, int parm_type);
