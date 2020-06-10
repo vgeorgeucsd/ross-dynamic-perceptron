@@ -65,7 +65,7 @@ void printStim(struct Stim* graph)
       k++;
     }
     printf("\n");
-    printf("Number of outgoing edges: %d \n",k);
+    // printf("Number of outgoing edges: %d \n",k);
     k=0;
   }
 }

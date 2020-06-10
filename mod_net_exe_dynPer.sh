@@ -40,9 +40,10 @@ cd ${ROSSBUILDDIR}
 cmake ../ -DROSS_BUILD_MODELS=ON
 make
 cd ${ROSSMODELDIR}
-./dynPer --extramem=100 --synch=1
+# ./dynPer --extramem=100 --synch=1
 # mpirun -np 1 ./dynPer --synch=4 --nkp=1
 # mpirun -np 3 ./dynPer --synch=3
+./dynPer --extramem=100 --synch=2
 
 
 cd ${MODELDIR}
