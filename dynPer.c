@@ -14,16 +14,26 @@
 
 // char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_input.793";
 // char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_input.793";
-// char stim_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/stim_input.74.5";
-char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_input.original";
-char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_input.original";
-char stim_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/stim_input.original";
+//char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_input.original";
+//char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_input.original";
+//char stim_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/stim_input.original";
 // char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_info_source_200.out";
 // char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_info_source_200.out";
 
 // char edge_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/edge_info_source_TOTALNUMBEROFNODES.out";
 // char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/vertex_info_source_TOTALNUMBEROFNODES.out";
-char output_dir[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/temp_outputs/";
+//char output_dir[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/temp_outputs/";
+//char stim_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/stim_input.74.5";
+
+char stim_path[] = "/g/g20/george39/ross-dynamic-perceptron/stim_input.74.5";
+char edge_path[] = "/g/g20/george39/ross-dynamic-perceptron/edge_info_source_TOTALNUMBEROFNODES.out";
+char vertex_path[] = "/g/g20/george39/ross-dynamic-perceptron/vertex_info_source_TOTALNUMBEROFNODES.out";
+char output_dir[] = "/g/g20/george39/ross-dynamic-perceptron/temp_outputs/";
+
+//char edge_path[] = "/g/g20/george39/ross-dynamic-perceptron/edge_input.original";
+//char vertex_path[] = "/g/g20/george39/ross-dynamic-perceptron/vertex_input.original";
+//char stim_path[] = "/g/g20/george39/ross-dynamic-perceptron/stim_input.original";
+//char output_dir[] = "/g/g20/george39/ross-dynamic-perceptron/temp_outputs/";
 
 //struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
 struct Graph* graph;
@@ -57,8 +67,9 @@ init(airport_state * s, tw_lp * lp)
   int numOutEdges1=0;
 
   // Initialize the activators information
-  for(int i=0;i<maxActivatorsList;i++)
-    for(int j=0;j<maxActivatorsParms;j++)
+  int i,j;
+  for(i=0;i<maxActivatorsList;i++)
+    for(j=0;j<maxActivatorsParms;j++)
       s->activators_info[i][j]=-1;
   // End initializing activators information
 
@@ -202,8 +213,29 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
             s->remaining_refractory_period = 0;
             msg->previous_evaluation_time = s->last_evaluation_time;
             ts = msg->previous_evaluation_time - s->current_time;
-            decay_value = exp(ts);
+//            decay_value = exp(ts);
+
             msg->prev_current_amplitude = s->current_amplitude;
+//            printf("\t\t%s %11.11lf\n", "PrevCurrentAmplitude: ", msg->prev_current_amplitude);
+            double numerator,super_decay,max_value,min_value;
+            super_decay = (msg->prev_current_amplitude * (1 + (0.8 * exp(0.03 * ts))))/(1 + exp(0.03 * ts));
+//            printf("\t\t%s %11.11lf\n", "Super_decay: ", super_decay);
+            max_value = (msg->prev_current_amplitude * (1 + (0.8 * exp(0.03 * 0))))/(1 + exp(0.03 * 0));
+//            printf("\t\t%s %11.11lf\n", "Max_value: ", max_value);
+            min_value = (msg->prev_current_amplitude * (1 + (0.8 * exp(0.03 * 10000))))/(1 + exp(0.03 * 10000));
+//            printf("\t\t%s %11.11lf\n", "Min_value: ", min_value);
+            numerator = super_decay - min_value;
+//            printf("\t\t%s %11.11lf\n", "Numerator: ", numerator);
+            if(max_value - min_value <= 0)
+            {
+               decay_value = 0;
+            }
+            else
+            {
+               decay_value = numerator / abs(max_value - min_value);
+            }
+//            printf("\t\t%s %11.11lf\n", "Decay_value: ", decay_value);
+
             s->current_amplitude = msg->edge_sig_amplitude * msg->edge_weight + s->current_amplitude * decay_value; //applying simple decay
 
 #if VIVEK_DEBUG
@@ -264,7 +296,8 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
                 // End STDP code
 
                 // Setting back the activators list to the initialized values after firing
-                for(int j=0; j<maxActivatorsParms ; j++)
+                int j;
+                for(j=0; j<maxActivatorsParms ; j++)
                 {
                   s->activators_info[i][j]=-1;
                 }
@@ -699,7 +732,6 @@ main(int argc, char **argv, char **env)
 
   printf("\n Start Simulation \n");
   tw_run();
-  printf("\n End Simulation \n");
 
   if(tw_ismaster())
   {
@@ -708,6 +740,8 @@ main(int argc, char **argv, char **env)
 //    printf("\t%-50s %11lu\n", "Number of nodes",
 //      nlp_per_pe * g_tw_npe * tw_nnodes());
     printf("\t%-50s %d\n", "ROSS do not print value ", ROSS_DO_NOT_PRINT);
+
+    printf("\n End Simulation \n");
   }
 
   tw_end();
