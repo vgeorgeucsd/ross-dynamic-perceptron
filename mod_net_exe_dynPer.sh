@@ -1,18 +1,20 @@
 #~/bin/bash
 NUMHIDNODES=10
 
-#ROSSMODELDIR=/home/vivek/research/dynamic_perceptron/working_ross/ROSS/build/models/ross-dynamic-perceptron
-#MODELDIR=/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron
-#MSFTDIR=/home/vivek/research/dynamic_perceptron/ucsd_ceni/ucsd_ceni_msft/scripts
-#ROSSBUILDDIR=/home/vivek/research/dynamic_perceptron/working_ross/ROSS/build
-#OUTPUTDIR=/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/temp_outputs
+# instert current directory here
+MODELDIR=/home/vivek/research/dynamic_perceptron/working_ross/fresh_pull/ross-dynamic-perceptron
 
-ROSSMODELDIR=/g/g20/george39/ROSS/build/models/ross-dynamic-perceptron
-MODELDIR=/p/lustre1/george39/ross-dynamic-perceptron
-MSFTDIR=/g/g20/george39/ucsd_ceni_msft/scripts
-ROSSBUILDDIR=/g/g20/george39/ROSS/build
-#OUTPUTDIR=/g/g20/george39/ross-dynamic-perceptron/temp_outputs
-OUTPUTDIR=/p/lustre1/george39/simulations/ROSS/z_sample_outputs_${NUMHIDNODES}
+ROSSMODELDIR=/home/vivek/research/dynamic_perceptron/working_ross/ROSS/build/models/ross-dynamic-perceptron
+MSFTDIR=/home/vivek/research/dynamic_perceptron/ucsd_ceni/ucsd_ceni_msft/scripts
+ROSSBUILDDIR=/home/vivek/research/dynamic_perceptron/working_ross/ROSS/build
+OUTPUTDIR=/home/vivek/research/dynamic_perceptron/working_ross/fresh_pull/ross-dynamic-perceptron/temp_outputs
+
+# ROSSMODELDIR=/g/g20/george39/ROSS/build/models/ross-dynamic-perceptron
+# MODELDIR=/p/lustre1/george39/ross-dynamic-perceptron
+# MSFTDIR=/g/g20/george39/ucsd_ceni_msft/scripts
+# ROSSBUILDDIR=/g/g20/george39/ROSS/build
+# #OUTPUTDIR=/g/g20/george39/ross-dynamic-perceptron/temp_outputs
+# OUTPUTDIR=/p/lustre1/george39/simulations/ROSS/z_sample_outputs_${NUMHIDNODES}
 
 TOTALNODES=$((${NUMHIDNODES} + 784 + 4))
 
@@ -25,9 +27,9 @@ sed "s/NUMBEROFHIDDENNODES/$NUMHIDNODES/g" create_ross_inputs.py > create_ross_i
 
 # conda activate vivek_ucsd_ceni
 python create_ross_inputs_${NUMHIDNODES}.py
-#mv vertex_info_source_${NUMHIDNODES}.out ${MODELDIR}
-#mv edge_info_source_${NUMHIDNODES}.out ${MODELDIR}
-rm create_ross_inputs_${NUMHIDNODES}.py
+mv vertex_info_source_${NUMHIDNODES}.out ${MODELDIR}
+mv edge_info_source_${NUMHIDNODES}.out ${MODELDIR}
+# rm create_ross_inputs_${NUMHIDNODES}.py
 
 cd ${MODELDIR}
 
@@ -41,6 +43,7 @@ sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g" generate_stimulus.h > generate_stimulus
 sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g" CMakeLists.txt.var > CMakeLists.txt
 
 cd ${OUTPUTDIR}
+touch sample
 rm *
 
 cd ${ROSSBUILDDIR}
@@ -56,7 +59,8 @@ cd ${ROSSMODELDIR}
 cd ${MODELDIR}
 rm vertex_info_source_${TOTALNODES}.out
 rm edge_info_source_${TOTALNODES}.out
-#rm dynPer_${TOTALNODES}.h
-#rm dynPer_${TOTALNODES}.c
-#rm network_parameters_${TOTALNODES}.c
-#rm generate_graph_${TOTALNODES}.c
+rm dynPer_${TOTALNODES}.h
+rm dynPer_${TOTALNODES}.c
+rm network_parameters_${TOTALNODES}.h
+rm generate_graph_${TOTALNODES}.h
+rm generate_stimulus_${TOTALNODES}.h

@@ -63,7 +63,7 @@ struct Graph* createGraph(FILE* reads, struct Graph* graph)
 
     // point head pointer to new node
     graph->head[src] = newNode;
-    printf("Reading Edge: %d -> %d (wgt: %f, dist: %f)\n", src, graph->head[src]->dest, graph->head[src]->weight,graph->head[src]->dist);
+    // printf("Reading Edge: %d -> %d (wgt: %f, dist: %f)\n", src, graph->head[src]->dest, graph->head[src]->weight,graph->head[src]->dist);
   }
 
   return graph;
@@ -78,7 +78,7 @@ struct Graph* addVertexInfo(FILE* reads, struct Graph* graph)
   printf("Reading vertex info file\n");
   while(fscanf(reads,"%d %f %f", &nid, &ref_per, &threshold)==VertexParms)
   {
-    printf("Reading Vertex: %d\n",nid);
+    // printf("Reading Vertex: %d\n",nid);
     if(graph->head[nid] == NULL)
     {
       printf("Initializing Vertex: %d\n", nid);
@@ -90,7 +90,7 @@ struct Graph* addVertexInfo(FILE* reads, struct Graph* graph)
       newNode->weight = 0;
       newNode->dist = 0;
       graph->head[nid] = newNode;
-      printf("NID: %d, ref per: %f, thresh: %f, dest: %d, wgt: %f, dist: %f \n", graph->head[nid]->nid, graph->head[nid]->ref_per, graph->head[nid]->threshold, graph->head[nid]->dest, graph->head[nid]->weight,graph->head[nid]->dist);
+      // printf("NID: %d, ref per: %f, thresh: %f, dest: %d, wgt: %f, dist: %f \n", graph->head[nid]->nid, graph->head[nid]->ref_per, graph->head[nid]->threshold, graph->head[nid]->dest, graph->head[nid]->weight,graph->head[nid]->dist);
     }
     else
     {
@@ -171,7 +171,7 @@ struct Graph* generate_graph(char edge_path[], char vertex_path[])
    }
 
     // print adjacency list representation of graph
-    printGraph(graph_int);
+    // printGraph(graph_int);
 
   }
   return graph_int;

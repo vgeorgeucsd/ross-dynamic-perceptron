@@ -44,7 +44,7 @@ struct Stim* createStim(FILE* reads, struct Stim* graph)
 
     // point head pointer to new node
     graph->head[src] = newNode;
-    printf("Reading Stim: %d (amplitude: %Lf, dly: %Lf)\n", src, graph->head[src]->amplitude,graph->head[src]->delay);
+    // printf("Reading Stim: %d (amplitude: %Lf, dly: %Lf)\n", src, graph->head[src]->amplitude,graph->head[src]->delay);
   }
 
   return graph;
@@ -60,11 +60,11 @@ void printStim(struct Stim* graph)
     struct StimNode* ptr = graph->head[i];
     while (ptr != NULL)
     {
-      printf("%d (wgt: %Lf, dly: %Lf)\t", i, ptr->amplitude,ptr->delay);
+      // printf("%d (wgt: %Lf, dly: %Lf)\t", i, ptr->amplitude,ptr->delay);
       ptr = ptr->next;
       k++;
     }
-    printf("\n");
+    // printf("\n");
     // printf("Number of outgoing edges: %d \n",k);
     k=0;
   }
