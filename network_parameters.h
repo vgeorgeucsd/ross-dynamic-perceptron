@@ -19,7 +19,7 @@
 // STDP parameters
 #define stdp_weight_switch 0  // turn on and off weight stdp
 #define stdp_speed_switch 0  // turn on and off weight stdp
-#define stdp_learning_rate 0.1
+#define stdp_learning_rate 0.05
 #define stdp_delta_change_params_weak_a 0.6
 #define stdp_delta_change_params_weak_b 8
 #define stdp_delta_change_params_str_a 0.3

@@ -792,7 +792,7 @@ tw_stime stdp_update_edge_parm(tw_stime delta_w, tw_stime edge_parm, int parm_op
     stdp_parm_max = stdp_speed_max;
     stdp_parm_min = stdp_speed_min;
   }
-  if(delta_w > 0)
+  if(delta_w >= 0)
   {
     update = stdp_learning_rate * delta_w * (stdp_parm_max - edge_parm);
   }
