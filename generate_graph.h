@@ -14,9 +14,9 @@ struct Graph {
 
 // A data structure to store adjacency list nodes of the graph
 struct Node {
-  int dest;
-  float weight,dist;
-  int nid;
+  unsigned long dest;
+  double weight,dist;
+  unsigned long nid;
   float ref_per;
   float threshold;
   struct Node* next;
@@ -46,11 +46,9 @@ struct Graph* createGraph(FILE* reads, struct Graph* graph)
 //      graph->head[i] = newNode0;
   }
   // add edges to the directed graph one by one
-  int src;
-  int dest;
-  float weight;
-  float dist;
-  while(fscanf(reads,"%d %d %f %f", &src, &dest, &weight, &dist)==EdgeParms)
+  unsigned long int src, dest;
+  double weight, dist;
+  while(fscanf(reads,"%lu %lu %lf %lf", &src, &dest, &weight, &dist)==EdgeParms)
   {
     // allocate new node of Adjacency List from src to dest
     struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
@@ -72,16 +70,16 @@ struct Graph* createGraph(FILE* reads, struct Graph* graph)
 // Function to print adjacency list representation of graph
 struct Graph* addVertexInfo(FILE* reads, struct Graph* graph)
 {
-  int nid;
+  unsigned long int nid;
   float ref_per;
   float threshold;
   printf("Reading vertex info file\n");
-  while(fscanf(reads,"%d %f %f", &nid, &ref_per, &threshold)==VertexParms)
+  while(fscanf(reads,"%lu %f %f", &nid, &ref_per, &threshold)==VertexParms)
   {
     // printf("Reading Vertex: %d\n",nid);
     if(graph->head[nid] == NULL)
     {
-      printf("Initializing Vertex: %d\n", nid);
+      printf("Initializing Vertex: %lu\n", nid);
       struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
       newNode->nid = nid;
       newNode->ref_per = ref_per;
@@ -110,19 +108,19 @@ struct Graph* addVertexInfo(FILE* reads, struct Graph* graph)
 // Function to print adjacency list representation of graph
 void printGraph(struct Graph* graph)
 {
-  int i,j,k=0;
+  unsigned long int i,j,k=0;
   for (i = 0; i < N; i++)
   {
     // print current vertex and all ts neighbors
     struct Node* ptr = graph->head[i];
     while (ptr != NULL)
     {
-      printf("%d -> %d (wgt: %f, dist: %f)\t", i, ptr->dest, ptr->weight,ptr->dist);
+      printf("%lu -> %lu (wgt: %f, dist: %lf)\t", i, ptr->dest, ptr->weight,ptr->dist);
       ptr = ptr->next;
       k++;
     }
     printf("\n");
-    printf("Number of outgoing edges: %d \n",k);
+    printf("Number of outgoing edges: %lu \n",k);
     k=0;
   }
 
@@ -131,7 +129,7 @@ void printGraph(struct Graph* graph)
   for (j = 0; j < N; j++)
   {
     // print current vertex info
-    printf("NID: %d, ref per: %f, thresh: %f\n", graph->head[j]->nid, graph->head[j]->ref_per, graph->head[j]->threshold);
+    printf("NID: %lu, ref per: %f, thresh: %f\n", graph->head[j]->nid, graph->head[j]->ref_per, graph->head[j]->threshold);
   }
 
 }

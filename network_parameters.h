@@ -30,7 +30,7 @@
 #define stdp_speed_max 2
 
 // Outputs
-#define VIVEK_DEBUG 1
+#define VIVEK_DEBUG 0
 #define printEdgeValues_to_File 0
 #define printActivatorList_to_File 0
 #define OUTPUT_FILENAME_LENGTH 200

@@ -22,19 +22,19 @@ enum airport_event_t
 
 struct airport_state
 {
-  long int        id; // node id
-  double          firing_threshold; // this is the threshold for node activations
-  double          current_amplitude; // this is the current amplitude of the node
-  double          max_refractory_period; // length of the refractory periods
+  unsigned long int        id; // node id
+  tw_stime          firing_threshold; // this is the threshold for node activations
+  tw_stime          current_amplitude; // this is the current amplitude of the node
+  tw_stime          max_refractory_period; // length of the refractory periods
   tw_stime        remaining_refractory_period; // the time which remains in the nodes refractory period
   tw_stime        last_fired_time;
   tw_stime        last_evaluation_time;
   tw_stime        current_time;
   tw_stime        state_delta_t;
   // int             number_of_edge_parameters;
-  int             number_of_outgoing_edges; // this is the number of outoging edges
+  unsigned long int             number_of_outgoing_edges; // this is the number of outoging edges
   // tw_stime        **outgoing_edge_info;
-  long int        *outgoing_edge_info_dst;
+  unsigned long int        *outgoing_edge_info_dst;
   tw_stime        *outgoing_edge_info_dist;
   tw_stime        *outgoing_edge_info_speed;
   tw_stime        *outgoing_edge_info_weight;
@@ -61,17 +61,17 @@ struct airport_message
   airport_event_t type;
 
   tw_stime        previous_evaluation_time; // Reverse computation, last time the node was evaluated
-  double          node_activation_amplitude; // Amplitude of the node potential at node activation
+  tw_stime          node_activation_amplitude; // Amplitude of the node potential at node activation
   tw_stime        last_fired_time; // For reverse computation
-  double          edge_sig_amplitude;
-  double          edge_weight;
-  double          edge_speed;
-  double          prev_remaining_refractory_period;
-  double          prev_current_amplitude;
+  tw_stime          edge_sig_amplitude;
+  tw_stime          edge_weight;
+  tw_stime          edge_speed;
+  tw_stime          prev_remaining_refractory_period;
+  tw_stime          prev_current_amplitude;
   tw_stime        prev_last_fired_time;
-  long int        signal_origin; // node id of the source signal
+  unsigned long int        signal_origin; // node id of the source signal
   tw_stime        signal_origin_time;  // time of firing of source node
-  long int        signal_current_node; // node which is activated by the signal
+  unsigned long int        signal_current_node; // node which is activated by the signal
   tw_stime        prev_edge_weight; // this is for the reverse computation
   tw_stime        prev_edge_speed; // this is for the reverse computation
 

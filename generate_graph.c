@@ -14,9 +14,9 @@ struct Graph {
 
 // A data structure to store adjacency list nodes of the graph
 struct Node {
-  int dest;
+  unsigned long int dest;
   float dist,weight;
-  int nid;
+  unsigned long int nid;
   float ref_per;
   float threshold;
   struct Node* next;
@@ -25,7 +25,7 @@ struct Node {
 // Function to create an adjacency list from specified edges
 struct Graph* createGraph(FILE* reads)
 {
-  unsigned i;
+  unsigned long int i;
 
   // allocate memory for graph data structure
   struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
@@ -35,8 +35,7 @@ struct Graph* createGraph(FILE* reads)
     graph->head[i] = NULL;
 
   // add edges to the directed graph one by one
-  int src;
-  int dest;
+  unsigned long int src, dest;
   float weight;
   float dist;
   while(fscanf(reads,"%d %d %d %f", &src, &dest, &weight, &dist)==EdgeParms)
@@ -60,21 +59,8 @@ struct Graph* createGraph(FILE* reads)
 // Function to print adjacency list representation of graph
 struct Graph* addVertexInfo(struct Graph* graph, FILE* reads)
 {
-//  int i;
-//  for (i = 0; i < N; i++)
-//  {
-//    // print current vertex and all ts neighbors
-//    struct Node* ptr = graph->head[i];
-//    while (ptr != NULL)
-//    {
-//      printf("%d -> %d (%d)\t", i, ptr->dest, ptr->weight);
-//      ptr = ptr->next;
-//    }
-//
-//    printf("\n");
-//  }
 
-  int nid;
+  unsigned long int nid;
   float ref_per;
   float threshold;
   printf("Reading vertex info file\n");
@@ -93,7 +79,7 @@ struct Graph* addVertexInfo(struct Graph* graph, FILE* reads)
 // Function to print adjacency list representation of graph
 void printGraph(struct Graph* graph)
 {
-  int i,j;
+  unsigned long int i,j;
   for (i = 0; i < N; i++)
   {
     // print current vertex and all ts neighbors
