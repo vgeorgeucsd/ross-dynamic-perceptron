@@ -1,6 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
 #include "network_parameters_TOTALNUMBEROFNODES.h"
+
+#ifdef DBL_DECIMAL_DIG
+  #define OP_DBL_Digs (DBL_DECIMAL_DIG)
+#else
+  #ifdef DECIMAL_DIG
+    #define OP_DBL_Digs (DECIMAL_DIG)
+  #else
+    #define OP_DBL_Digs (DBL_DIG + 3)
+  #endif
+#endif
 // Define maximum number of vertices in the graph
 // #define N 3
 // #define EdgeParms 4
@@ -33,21 +44,13 @@ struct Graph* createGraph(FILE* reads, struct Graph* graph)
   // initialize head pointer for all vertices
   for (i = 0; i < N; i++)
   {
-//      struct Node* newNode0 = (struct Node*)malloc(sizeof(struct Node));
       graph->head[i] = NULL;
-//      newNode0->dest = NULL;
-//      newNode0->weight = 0;
-//      newNode0->delay = 0;
-
-    // point new node to current head
-//    newNode0->next = graph->head[i];
-
-    // point head pointer to new node
-//      graph->head[i] = newNode0;
   }
   // add edges to the directed graph one by one
   unsigned long int src, dest;
   double weight, dist;
+//  int Digs = DECIMAL_DIG;
+
   while(fscanf(reads,"%lu %lu %lf %lf", &src, &dest, &weight, &dist)==EdgeParms)
   {
     // allocate new node of Adjacency List from src to dest
@@ -61,7 +64,11 @@ struct Graph* createGraph(FILE* reads, struct Graph* graph)
 
     // point head pointer to new node
     graph->head[src] = newNode;
-    // printf("Reading Edge: %d -> %d (wgt: %f, dist: %f)\n", src, graph->head[src]->dest, graph->head[src]->weight,graph->head[src]->dist);
+
+//    printf("In File Edge: %lu -> %lu (wgt: %11.30lf, dist: %11.30lf)\n", src, dest, weight,dist);
+//    printf("Reading Edge: %lu -> %lu (wgt: %11.30lf, dist: %11.30lf)\n", src, graph->head[src]->dest, graph->head[src]->weight,graph->head[src]->dist);
+//    printf("In File Edge: %lu -> %lu (wgt: %.*f, dist: %.*f)\n", src, dest, OP_DBL_Digs, weight, OP_DBL_Digs,dist);
+//    printf("Reading Edge: %lu -> %lu (wgt: %.*f, dist: %.*f)\n", src, graph->head[src]->dest, OP_DBL_Digs, graph->head[src]->weight, OP_DBL_Digs, graph->head[src]->dist);
   }
 
   return graph;
@@ -79,7 +86,7 @@ struct Graph* addVertexInfo(FILE* reads, struct Graph* graph)
     // printf("Reading Vertex: %d\n",nid);
     if(graph->head[nid] == NULL)
     {
-      printf("Initializing Vertex: %lu\n", nid);
+      // printf("Initializing Vertex: %lu\n", nid);
       struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
       newNode->nid = nid;
       newNode->ref_per = ref_per;

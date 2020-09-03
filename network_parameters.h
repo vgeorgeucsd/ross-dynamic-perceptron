@@ -5,7 +5,7 @@
 #define EdgeParms 4
 #define VertexParms 3
 #define StimParms 3
-#define SIM_TIME_LIMIT 1
+#define SIM_TIME_LIMIT 0.5
 #define maxActivatorsList 100000
 #define maxActivatorsParms 4
 // Network dynamics parameters
@@ -17,23 +17,23 @@
 #define gabe_decay 0
 
 // STDP parameters
-#define stdp_weight_switch 0  // turn on and off weight stdp
-#define stdp_speed_switch 0  // turn on and off weight stdp
+#define stdp_weight_switch 1  // turn on and off weight stdp
+#define stdp_speed_switch 1  // turn on and off weight stdp
 #define stdp_learning_rate 0.05
-#define stdp_delta_change_params_weak_a 0.6
-#define stdp_delta_change_params_weak_b 8
+#define stdp_delta_change_params_weak_a -0.6
+#define stdp_delta_change_params_weak_b 8.0
 #define stdp_delta_change_params_str_a 0.3
-#define stdp_delta_change_params_str_b 5
-#define stdp_weight_min -2
-#define stdp_weight_max 2
-#define stdp_speed_min 0
-#define stdp_speed_max 2
+#define stdp_delta_change_params_str_b 5.0
+#define stdp_weight_min -2.0
+#define stdp_weight_max 2.0
+#define stdp_speed_min 0.0
+#define stdp_speed_max 2.0
 
 // Outputs
 #define VIVEK_DEBUG 0
-#define printEdgeValues_to_File 0
+#define VIVEK_DEBUGx 0
 #define printActivatorList_to_File 0
 #define OUTPUT_FILENAME_LENGTH 200
 #define STRING_SIZE_OF_NODE_IDS 10
-#define OUTPUT_EDGE_WEIGHTS_TO_STDOUT 0
-#define OUTPUT_ACT_LST_TO_STDOUT 1
+#define OUTPUT_EDGE_WEIGHTS_TO_STDOUT 1
+#define OUTPUT_ACT_LST_TO_STDOUT 0

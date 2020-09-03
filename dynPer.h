@@ -74,6 +74,7 @@ struct airport_message
   unsigned long int        signal_current_node; // node which is activated by the signal
   tw_stime        prev_edge_weight; // this is for the reverse computation
   tw_stime        prev_edge_speed; // this is for the reverse computation
+  tw_stime        signal_arrival_time; // used for STDP calculation
 
 };
 

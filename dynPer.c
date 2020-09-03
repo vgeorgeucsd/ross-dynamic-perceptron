@@ -50,11 +50,11 @@ void
 init(airport_state * s, tw_lp * lp)
 {
 
-  unsigned long int vertex = (long int) lp->gid;
+  unsigned long int self_id = (unsigned long int) lp->gid;
   extern struct Graph* graph;
 
   extern struct Stim* stim;
-  struct StimNode* stimPtr = stim->head[vertex];
+  struct StimNode* stimPtr = stim->head[self_id];
 
   // Initial values of vertices
   tw_event *e;
@@ -74,12 +74,12 @@ init(airport_state * s, tw_lp * lp)
   // End initializing activators information
 
   // Getting Graph information
-  s->id = graph->head[vertex]->nid;
-  s->max_refractory_period = graph->head[vertex]->ref_per;
-  s->firing_threshold = graph->head[vertex]->threshold;
+  s->id = graph->head[self_id]->nid;
+  s->max_refractory_period = graph->head[self_id]->ref_per;
+  s->firing_threshold = graph->head[self_id]->threshold;
   // s->number_of_edge_parameters = 2;
 
-  struct Node* ptr = graph->head[vertex];
+  struct Node* ptr = graph->head[self_id];
   while (ptr != NULL)
   {
     ptr = ptr->next;
@@ -87,12 +87,12 @@ init(airport_state * s, tw_lp * lp)
   }
 
 #if VIVEK_DEBUG1
-  printf("Node %lu Parameters:\n",vertex);
+  printf("Node %lu Parameters:\n",self_id);
   printf("\tNumber of outgoing edges: %lu\n", numOutEdges);
 #endif
 
   s->number_of_outgoing_edges = numOutEdges;
-  if(s->number_of_outgoing_edges == 0 || graph->head[vertex]->dest == -1 )
+  if(s->number_of_outgoing_edges == 0 || graph->head[self_id]->dest == -1 )
   {
     // do nothing
     s->number_of_outgoing_edges = 0;
@@ -104,7 +104,7 @@ init(airport_state * s, tw_lp * lp)
     s->outgoing_edge_info_speed = tw_calloc(TW_LOC,"oe_speed",sizeof(tw_stime *), s->number_of_outgoing_edges);
     s->outgoing_edge_info_weight = tw_calloc(TW_LOC,"oe_weight",sizeof(tw_stime *), s->number_of_outgoing_edges);
 
-    struct Node* ptr1 = graph->head[vertex];
+    struct Node* ptr1 = graph->head[self_id];
     while (ptr1 != NULL)
     {
       s->outgoing_edge_info_dst[numOutEdges1] = ptr1->dest;
@@ -112,25 +112,19 @@ init(airport_state * s, tw_lp * lp)
       s->outgoing_edge_info_speed[numOutEdges1] = INIT_EDGE_SPEED;
       s->outgoing_edge_info_weight[numOutEdges1] = ptr1->weight;
       // s->outgoing_edge_info_amplitude[numOutEdges1] = 0; // initial edge signal amplitude
-      ptr1 = ptr1->next;
-
-#if printEdgeValues_to_File
-      char bufferStimEdge[STRING_SIZE_OF_NODE_IDS];
-      snprintf(bufferStimEdge, sizeof bufferStimEdge, "%li",s->id);
-      char outFilePathStimEdgeVal[OUTPUT_FILENAME_LENGTH];
-      strcpy(outFilePathStimEdgeVal,output_dir);
-      strcat(outFilePathStimEdgeVal,"edge_weights");
-      strcat(outFilePathStimEdgeVal,bufferStimEdge);
-      strcat(outFilePathStimEdgeVal,".out");
-      FILE *edgeValfp = fopen(outFilePathStimEdgeVal, "a");
-
-      fprintf(edgeValfp,"Edge from Node %lu to Node %lu Edge Speed : %f Edge Weight: %f Current Time: 0.0 \n", vertex, s->outgoing_edge_info_dst[numOutEdges1], (s->outgoing_edge_info_dist[numOutEdges1])/(s->outgoing_edge_info_speed[numOutEdges1]), s->outgoing_edge_info_weight[numOutEdges1]);
-      fclose(edgeValfp); // closing the file after the writes
-#endif
 
 #if OUTPUT_EDGE_WEIGHTS_TO_STDOUT
-      tw_output(lp,"tw: Edge from Node %lu to Node %lu Edge Speed : %11.17lf Edge Weight: %11.17lf Current Time: 0.0 \n", vertex, s->outgoing_edge_info_dst[numOutEdges1], (s->outgoing_edge_info_dist[numOutEdges1])/(s->outgoing_edge_info_speed[numOutEdges1]), s->outgoing_edge_info_weight[numOutEdges1]);
+      tw_output(lp,"tw: Edge from Node %lu to Node %lu ; Edge Speed : %11.17lf ; Edge Weight: %11.17lf ; Modified at Current Time: 0.0 \n", self_id, s->outgoing_edge_info_dst[numOutEdges1], s->outgoing_edge_info_speed[numOutEdges1], s->outgoing_edge_info_weight[numOutEdges1]);
 #endif
+#if VIVEK_DEBUG
+      printf("Source nid: %lu\n",self_id);
+      printf("Sim Var Target nid: %lu\n", s->outgoing_edge_info_dst[numOutEdges1]);
+      printf("Sim Var Edge Dist : %11.30lf\n", s->outgoing_edge_info_dist[numOutEdges1]);
+      printf("In Var Edge Dist : %11.30lf\n", ptr1->dist);
+
+#endif
+
+      ptr1 = ptr1->next;
       numOutEdges1++;
     }
   }
@@ -146,18 +140,21 @@ init(airport_state * s, tw_lp * lp)
 //  }
   while (stimPtr != NULL && stimPtr->amplitude != 0)
     {
-      e = tw_event_new(lp->gid, stimPtr->delay, lp);
+      e = tw_event_new(self_id, stimPtr->delay, lp);
       m = tw_event_data(e);
       m->type = ARRIVING;
       m->edge_sig_amplitude = stimPtr->amplitude;
       m->edge_weight = 1;
       m->edge_speed = 1;
+      m->signal_origin = self_id;
+      m->signal_origin_time = 0;
       tw_event_send(e);
-#if VIVEK_DEBUG1
-      printf("Stimulus nid: %lu\n",vertex);
+#if VIVEK_DEBUG
+      printf("Stimulus event\n");
+      printf("Stimulus nid: %lu\n",self_id);
+      printf("Target nid: %lu\n", self_id);
       printf("Stimulus Amplitude: %Lf\n",stimPtr->amplitude);
-      printf("Stimulus Time: %Lf\n",stimPtr->delay);
-      printf("created new stimulus event\n");
+      printf("Stimulus Delay: %Lf\n",stimPtr->delay);
 #endif
       stimPtr = stimPtr->next;
     }
@@ -172,7 +169,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
   tw_stime ts;
   tw_event *e;
   airport_message *m;
-  int i;
+  unsigned long int i;
   tw_stime sig_diff, decay_value;
   s->current_time = tw_now(lp);
 
@@ -182,18 +179,18 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
       case ARRIVING:
         {
           sig_diff = s->current_time - s->last_fired_time;
-#if VIVEK_DEBUG1
+#if VIVEK_DEBUG
           printf("\nSignal Arrived\n");
           printf("\t%s %li\n", "Signal Arrived from Node: ", msg->signal_origin);
           printf("\t%s %li\n", "Signal Arrived to Node: ", lp->gid);
-          printf("\t\t%s %lf\n", "At Time: ", s->current_time);
-          printf("\t\t%s %lf\n", "Node Last Fired At: ", s->last_fired_time);
-          printf("\t\t%s %lf\n", "Signal Difference: ", sig_diff);
-          printf("\t\t%s %lf\n", "Max Refractory Period: ", s->max_refractory_period);
+          printf("\t\t%s %11.22lf\n", "At Time: ", s->current_time);
+          // printf("\t\t%s %lf\n", "Node Last Fired At: ", s->last_fired_time);
+          // printf("\t\t%s %lf\n", "Signal Difference: ", sig_diff);
+          // printf("\t\t%s %lf\n", "Max Refractory Period: ", s->max_refractory_period);
 #endif
           // if the node is listening
           // if(s->remaining_refractory_period >= s->max_refractory_period)
-          if(sig_diff >= s->max_refractory_period)
+          if(sig_diff > s->max_refractory_period)
           {
             // keeping track of activators list
             s->activators_info[s->num_activators][0] = msg->signal_origin;
@@ -238,70 +235,31 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
             s->remaining_refractory_period = 0;
             msg->previous_evaluation_time = s->last_evaluation_time;
             ts = msg->previous_evaluation_time - s->current_time;
-            decay_value = exp(ts);
+            decay_value = exp(0.1*ts);
             msg->prev_current_amplitude = s->current_amplitude;
             s->current_amplitude = msg->edge_sig_amplitude * msg->edge_weight + s->current_amplitude * decay_value; //applying simple decay
 #endif
 
-#if VIVEK_DEBUG1
-            printf("\t\t%s %11.17lf\n", "Incoming Signal Amplitude: ", msg->edge_sig_amplitude);
-            printf("\t\t%s %11.17lf\n", "Incoming Edge Weight: ", msg->edge_weight);
-            printf("\t\t%s %11.17lf\n", "Decay value: ", decay_value);
-            printf("\t\t%s %11.17lf\n", "Previous Amplitude: ", msg->prev_current_amplitude);
-            printf("\t\t%s %11.17lf\n", "Firing Threshold: ", s->firing_threshold);
-            printf("\t\t%s %11.17lf\n", "Current Amplitude: ", s->current_amplitude);
-            printf("\t\t%s %11.17lf\n", "Remaining Refractory Period: ", s->remaining_refractory_period);
-#endif
             s->last_evaluation_time = s->current_time;
 
             if(s->current_amplitude >= s->firing_threshold)
             {
-#if VIVEK_DEBUG
-
-            printf("\n%s %li\n", "Signal Arrived to Node: ", lp->gid);
-            printf("%s %11.17lf\n", "Incoming Signal Amplitude: ", msg->edge_sig_amplitude);
-            printf("%s %11.17lf\n", "Incoming Edge Weight: ", msg->edge_weight);
-            printf("%s %11.17lf\n", "Decay value: ", decay_value);
-            printf("%s %11.17lf\n", "Previous Amplitude: ", msg->prev_current_amplitude);
-            printf("%s %11.17lf\n", "Firing Threshold: ", s->firing_threshold);
-            printf("%s %11.17lf\n", "Current Amplitude: ", s->current_amplitude);
-            printf("%s %11.17lf\n", "Remaining Refractory Period: ", s->remaining_refractory_period);
-#endif
               // Printing out the activators inforamtion
-#if printActivatorList_to_File
-              // File printing inforamtion
-              char bufferArrivalVert[STRING_SIZE_OF_NODE_IDS];
-              snprintf(bufferArrivalVert, sizeof bufferArrivalVert, "%li",s->id);
-              char outFilePath[OUTPUT_FILENAME_LENGTH];
-              strcpy(outFilePath,output_dir);
-              strcat(outFilePath,"act_list_");
-              strcat(outFilePath,bufferArrivalVert);
-              strcat(outFilePath,".out");
-              FILE *fp = fopen(outFilePath, "a");
-              // FILE *fp = fopen("/home/vivek/research/dynamic_perceptron/working_ross/ross-dynamic-perceptron/testOutput.out", "a");
-              printf("\t\t Writing to File: %s\n", outFilePath);
-#endif
               // End setting p the File printing information
-              // printf("\t\t Activators List Info: \n");
               for (i=0; i<s->num_activators ; i++)
               {
-                // printf("\t\t Target Node: %li, Target Node Act Time: %lf, Source Node: %lf, Source Activation Time: %lf, Source Signal Amplitude: %lf, Source Signal Arrival Time: %lf\n", s->id, s->last_evaluation_time, s->activators_info[i][0],s->activators_info[i][1],s->activators_info[i][2], s->activators_info[i][3]);
-
-#if printActivatorList_to_File
-                // fprintf(fp,"This is a test\n");
-                fprintf(fp,"Activation Target Node: %lu, Target Node Act Time: %lf, Source Node: %lf, Source Activation Time: %lf, Source Signal Amplitude: %lf, Source Signal Arrival Time: %lf\n", s->id, s->last_evaluation_time, s->activators_info[i][0],s->activators_info[i][1],s->activators_info[i][2], s->activators_info[i][3]);
-#endif
 
 #if OUTPUT_ACT_LST_TO_STDOUT
-                tw_output(lp,"tw: Activation Target Node: %lu, Target Node Act Time: %11.17lf, Source Node: %11.17lf, Source Activation Time: %11.17lf, Source Signal Amplitude: %11.17lf, Source Signal Arrival Time: %11.17lf\n", s->id, s->last_evaluation_time, s->activators_info[i][0],s->activators_info[i][1],s->activators_info[i][2], s->activators_info[i][3]);
+                tw_output(lp,"tw: Activation Target Node: %lu, Target Node Act Time: %11.21lf, Source Node: %lf, Source Activation Time: %11.21lf, Source Signal Amplitude: %11.21lf, Source Signal Arrival Time: %11.21lf\n", s->id, s->last_evaluation_time, s->activators_info[i][0],s->activators_info[i][1],s->activators_info[i][2], s->activators_info[i][3]);
 #endif
 
                 // Sending STDP signals for strengthening edge weight
-                e = tw_event_new(s->activators_info[i][0], 0 ,lp);
+                e = tw_event_new(s->activators_info[i][0], 0.0 ,lp);
                 m = tw_event_data(e);
                 m->type = STDP_STRONG;
                 m->signal_origin = s->activators_info[i][0];
                 m->signal_origin_time = s->activators_info[i][1];
+                m->signal_arrival_time = s->activators_info[i][3];
                 m->last_fired_time = s->current_time; // this is when the target vertex fired
                 m->signal_current_node = lp->gid;  // sends the activated nodes id
                 m->prev_edge_weight = msg->edge_weight;
@@ -317,41 +275,36 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
                   s->activators_info[i][j]=-1;
                 }
               }
-#if printActivatorList_to_File
-              fclose(fp); // closing the file after the writes
-#endif
-
               s->num_activators = 0; // clear the number of activators
 
               // Getting message ready for sending singals to outgoing edges
-              e = tw_event_new(lp->gid, 0 ,lp);
+              e = tw_event_new(lp->gid, 0.0 ,lp);
               m = tw_event_data(e);
               m->type = DEPARTING;
               m->last_fired_time = s->last_fired_time;
               m->node_activation_amplitude = s->current_amplitude;
               m->prev_current_amplitude = msg->prev_current_amplitude;
               tw_event_send(e);
-
             }
           }
           else
           {
             // else drop the packet
-
-#if VIVEK_DEBUG1
+#if VIVEK_DEBUG
+            printf("\nNode is refractory \n");
             // Print dropped Signal information
             printf("\t\t Dropped Signal Information:\n");
             printf("\t\t Target Node: %li, Target Node Act Time: %lf, Source Node: %li, Source Activation Time: %lf, Source Signal Amplitude: %lf\n", s->id, s->last_evaluation_time, msg->signal_origin,msg->signal_origin_time,msg->edge_sig_amplitude);
             // end dropped signal information
 #endif
 
-            // e = tw_event_new(lp->gid, tw_now(lp), lp);
-            e = tw_event_new(lp->gid, 0 ,lp);
+            e = tw_event_new(lp->gid, 0.0 ,lp);
             m = tw_event_data(e);
             m->type = DROPPING;
             m->last_fired_time = s->last_fired_time;
             m->signal_origin = msg->signal_origin;
             m->signal_origin_time = msg->signal_origin_time;
+            m->signal_arrival_time = s->current_time;
             m->prev_remaining_refractory_period = s->remaining_refractory_period;
             m->prev_edge_weight = msg->edge_weight;
             m->prev_edge_speed = msg->edge_speed;
@@ -365,9 +318,9 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
         {
 #if VIVEK_DEBUG
           printf("\nSignals Departing\n");
-          printf("\t%s %lu\n", "Node Fired ID: ", lp->gid);
+          printf("\t%s %lu\n", "From Node: ", lp->gid);
           // printf("\t%s %li\n", "Node ID Fired: ", s->id);
-          printf("\t\t%s %11.17lf\n", "At Time: ", s->current_time);
+          printf("\t%s %11.22lf\n", "At Time: ", s->current_time);
 #endif
           msg->prev_current_amplitude = s->current_amplitude;
           s->current_amplitude = 0;
@@ -392,14 +345,16 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
                 m->signal_origin = lp->gid;
                 tw_event_send(e);
 #if VIVEK_DEBUG
-                printf("\t%s %lu\n", "Sending Outbound Signal to: ", dst_lp);
+                printf("\t%s %lu\n", "To Node: ", dst_lp);
                 // printf("\t\t%s %11.11lf\n", "Outbound Signal Delay: ", ts);
-                printf("\t%s %11.17lf\n", "Outbount Signal Delay: ", ts);
+                printf("\t%s %11.22lf\n", "Outbount Signal Delay: ", ts);
+                printf("\t%s %11.22lf\n", "Outbount Signal Speed: ", s->outgoing_edge_info_speed[i]);
+                printf("\t%s %11.22lf\n", "Outbount Edge Distance : ", s->outgoing_edge_info_dist[i]);
 #endif
               }
           }
-          else
 #if VIVEK_DEBUG1
+          else
             printf("\tNo outgoing signals.\n");
 #endif
 
@@ -410,11 +365,13 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
         {
           s->remaining_refractory_period = s->max_refractory_period - (s->current_time - msg->last_fired_time);
           s->current_amplitude = 0;
-#if VIVEK_DEBUG1
+#if VIVEK_DEBUG
           printf("\n\n Node Refractory, Dropped Packet!\n");
           printf("\t%s %li\n", "Signal Arrived from Node: ", msg->signal_origin);
+          printf("\t%s %11.17lf\n", "Which Fired At Time: ", msg->signal_origin_time);
           printf("\t%s %li\n", "Target Node Droping Signal: ", lp->gid);
-          printf("\t\t%s %11.17lf\n", "Remaining Refractory Period: ", s->remaining_refractory_period);
+          printf("\t%s %11.17lf\n", "Remaining Refractory Period: ", s->remaining_refractory_period);
+          printf("\t%s %11.17lf\n", "Signal Arrival Time: ", s->current_time);
 #endif
           // Sending STDP signals for weakening edge weight
           e = tw_event_new(msg->signal_origin, 0 ,lp);
@@ -422,6 +379,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
           m->type = STDP_WEAK;
           m->signal_origin = msg->signal_origin;
           m->signal_origin_time = msg->signal_origin_time;
+          m->signal_arrival_time = msg->signal_arrival_time;
           m->last_fired_time = s->current_time; // this is when the target vertex fired
           m->signal_current_node = lp->gid;
           m->prev_edge_weight = msg->prev_edge_weight;
@@ -433,7 +391,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
         }
       case STDP_STRONG:
         {
-#if VIVEK_DEBUG1
+#if VIVEK_DEBUG
           printf("\n%s\n\n", "Doing STDP Weight Increase");
           printf("\t%s%li\n","Signal Source Node: ",msg->signal_origin);
           printf("\t%s%f\n","Which Fired at Time: ",msg->signal_origin_time);
@@ -442,7 +400,10 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
 #endif
 
           // defining some variables to calculate stdp changes
-          tw_stime delta_t = msg->signal_origin_time - msg->last_fired_time;
+          // Old STDP rule based on origin node firing time
+          // tw_stime delta_t = msg->signal_origin_time - msg->last_fired_time;
+          // New STDP rule based on origin node signal arrival time, ie. EPSP time
+          tw_stime delta_t = msg->signal_arrival_time - msg->last_fired_time;
           tw_stime delta_change = stdp_delta_change_params_str_a * powl(M_E,delta_t/stdp_delta_change_params_str_b); //the first argument of powl is eulers number
 
 
@@ -474,22 +435,8 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
               printf("Node %li connected to Node %li Edge Speed : %f Edge Weight: %f Current Time: %lf \n", msg->signal_origin, msg->signal_current_node, s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i], msg->last_fired_time);
 #endif
 
-#if printEdgeValues_to_File
-              char bufferEdgeSTDPStrong[STRING_SIZE_OF_NODE_IDS];
-              snprintf(bufferEdgeSTDPStrong, sizeof bufferEdgeSTDPStrong, "%lu",s->id);
-              char outFilePathEdgeSTDPStrong[OUTPUT_FILENAME_LENGTH];
-              strcpy(outFilePathEdgeSTDPStrong,output_dir);
-              strcat(outFilePathEdgeSTDPStrong,"edge_weights");
-              strcat(outFilePathEdgeSTDPStrong,bufferEdgeSTDPStrong);
-              strcat(outFilePathEdgeSTDPStrong,".out");
-              FILE *fpEdgeSTDPStrong = fopen(outFilePathEdgeSTDPStrong, "a");
-
-              fprintf(fpEdgeSTDPStrong,"Node %li connected to Node %li Edge Speed : %f Edge Weight: %f Current Time: %f \n", msg->signal_origin, msg->signal_current_node, s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i], msg->last_fired_time);
-              fclose(fpEdgeSTDPStrong); // closing the file after the writes
-#endif
-
 #if OUTPUT_EDGE_WEIGHTS_TO_STDOUT
-              tw_output(lp,"tw: Edge frode %li to Node %li Edge Speed : %f Edge Weight: %11.17lf Current Time: %11.17lf \n", msg->signal_origin, msg->signal_current_node, s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i], msg->last_fired_time);
+              tw_output(lp,"tw: STDP_STR Edge from Node %lu to Node %lu ; Edge Speed : %11.22lf ; Edge Weight: %11.22lf ; Modified at Current Time: %11.22lf \n", msg->signal_origin, msg->signal_current_node, s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i], msg->last_fired_time);
 #endif
             }
           }
@@ -498,7 +445,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
 
       case STDP_WEAK:
         {
-#if VIVEK_DEBUG1
+#if VIVEK_DEBUG
           printf("\n%s\n\n", "Doing STDP Weight Decrease");
           printf("\t%s%li\n","Signal Source Node: ",msg->signal_origin);
           printf("\t%s%f\n","Which Fired at Time: ",msg->signal_origin_time);
@@ -507,8 +454,11 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
 #endif
 
           // defining some variables to calculate stdp changes
-          tw_stime delta_t = msg->signal_origin_time - msg->last_fired_time;
-          tw_stime delta_change = -1 * stdp_delta_change_params_weak_a * powl(M_E,delta_t/stdp_delta_change_params_weak_b); //the first argument of powl is eulers number
+          // Old STDP based on origin node firing time
+          // tw_stime delta_t = msg->signal_origin_time - msg->last_fired_time;
+          // New STDP based on origin node signal arrival time
+          tw_stime delta_t = msg->signal_arrival_time - msg->last_fired_time;
+          tw_stime delta_change = stdp_delta_change_params_weak_a * powl(M_E,delta_t/stdp_delta_change_params_weak_b); //the first argument of powl is eulers number
 
           for(i=0; i < s->number_of_outgoing_edges; i++)
           {
@@ -535,22 +485,8 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
               printf("\t%s%lf\n"," New Edge Speed: ", s->outgoing_edge_info_speed[i]);
 #endif
 
-#if printEdgeValues_to_File
-              char bufferEdgeSTDPWeak[STRING_SIZE_OF_NODE_IDS];
-              snprintf(bufferEdgeSTDPWeak, sizeof bufferEdgeSTDPWeak, "%lu",s->id);
-              char outFilePathEdgeSTDPWeak[OUTPUT_FILENAME_LENGTH];
-              strcpy(outFilePathEdgeSTDPWeak,output_dir);
-              strcat(outFilePathEdgeSTDPWeak,"edge_weights");
-              strcat(outFilePathEdgeSTDPWeak,bufferEdgeSTDPWeak);
-              strcat(outFilePathEdgeSTDPWeak,".out");
-              FILE *fpEdgeSTDPWeak = fopen(outFilePathEdgeSTDPWeak, "a");
-
-              fprintf(fpEdgeSTDPWeak,"Node %lu connected to Node %lu Edge Speed : %f Edge Weight: %f Current Time: %f\n", msg->signal_origin, msg->signal_current_node, s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i], msg->last_fired_time);
-              fclose(fpEdgeSTDPWeak); // closing the file after the writes
-#endif
-
 #if OUTPUT_EDGE_WEIGHTS_TO_STDOUT
-              tw_output(lp,"tw: Edge From Node %lu to Node %lu Edge Speed : %11.17lf Edge Weight: %11.17lf Current Time: %11.17lf\n", msg->signal_origin, msg->signal_current_node, s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i], msg->last_fired_time);
+              tw_output(lp,"tw: STDP_WKN Edge From Node %lu to Node %lu ; Edge Speed : %11.22lf ; Edge Weight: %11.22lf ; Modified at Current Time: %11.22lf\n", msg->signal_origin, msg->signal_current_node, s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i], msg->last_fired_time);
 #endif
 
             }
@@ -767,7 +703,7 @@ main(int argc, char **argv, char **env)
 tw_stime stdp_update_edge_parm(tw_stime delta_w, tw_stime edge_parm, int parm_option)
 {
   tw_stime update;
-  float stdp_parm_max, stdp_parm_min;
+  tw_stime stdp_parm_max, stdp_parm_min;
 
   if(parm_option==0)
   {
@@ -779,7 +715,7 @@ tw_stime stdp_update_edge_parm(tw_stime delta_w, tw_stime edge_parm, int parm_op
     stdp_parm_max = stdp_speed_max;
     stdp_parm_min = stdp_speed_min;
   }
-  if(delta_w >= 0)
+  if(delta_w > 0)
   {
     update = stdp_learning_rate * delta_w * (stdp_parm_max - edge_parm);
   }
