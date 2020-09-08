@@ -2,6 +2,7 @@
 // #define N 838
 // #define N 988
 #define N TOTALNUMBEROFNODES // this is set by the bash script
+#define INNODES 784 // this is used for printing out the cutoffs on a per node basis
 #define EdgeParms 4
 #define VertexParms 3
 #define StimParms 3

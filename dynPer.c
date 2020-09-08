@@ -160,13 +160,13 @@ init(airport_state * s, tw_lp * lp)
     }
 
 #if OUTPUT_MSG_CUTOFFS
-  if(self_id>784){
+  if(self_id>=INNODES){
     for(tw_stime dly=0.0;dly<=SIM_TIME_LIMIT;dly+=CUTOFF_TIMES){
       e = tw_event_new(self_id, dly, lp);
       m = tw_event_data(e);
       m->type = PRINT_EDGE_WEIGHTS_SPEEDS;
       tw_event_send(e);
-      printf("Target nid: %lu; Delay Time: %lf\n", self_id, dly);
+      // printf("Target nid: %lu; Delay Time: %lf\n", self_id, dly);
     }
   }
 #endif
