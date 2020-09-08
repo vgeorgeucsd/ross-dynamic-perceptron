@@ -159,6 +159,17 @@ init(airport_state * s, tw_lp * lp)
       stimPtr = stimPtr->next;
     }
 
+#if OUTPUT_MSG_CUTOFFS
+  if(self_id>784){
+    for(tw_stime dly=0.0;dly<=SIM_TIME_LIMIT;dly+=CUTOFF_TIMES){
+      e = tw_event_new(self_id, dly, lp);
+      m = tw_event_data(e);
+      m->type = PRINT_EDGE_WEIGHTS_SPEEDS;
+      tw_event_send(e);
+      printf("Target nid: %lu; Delay Time: %lf\n", self_id, dly);
+    }
+  }
+#endif
 }
 
 
@@ -391,6 +402,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
         }
       case STDP_STRONG:
         {
+
 #if VIVEK_DEBUG
           printf("\n%s\n\n", "Doing STDP Weight Increase");
           printf("\t%s%li\n","Signal Source Node: ",msg->signal_origin);
@@ -406,7 +418,6 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
           tw_stime delta_t = msg->signal_arrival_time - msg->last_fired_time;
           tw_stime delta_change = stdp_delta_change_params_str_a * powl(M_E,delta_t/stdp_delta_change_params_str_b); //the first argument of powl is eulers number
 
-
           for(i=0; i < s->number_of_outgoing_edges; i++)
           {
             if(s->outgoing_edge_info_dst[i]==msg->signal_current_node)
@@ -414,6 +425,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
 #if VIVEK_DEBUG1
               printf("\t%s%lf","Old Edge Weight: ", s->outgoing_edge_info_weight[i]);
 #endif
+
               // Modify the edge weight by whatever rules
               if(stdp_weight_switch)
               {
@@ -438,6 +450,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
 #if OUTPUT_EDGE_WEIGHTS_TO_STDOUT
               tw_output(lp,"tw: STDP_STR Edge from Node %lu to Node %lu ; Edge Speed : %11.22lf ; Edge Weight: %11.22lf ; Modified at Current Time: %11.22lf \n", msg->signal_origin, msg->signal_current_node, s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i], msg->last_fired_time);
 #endif
+
             }
           }
           break;
@@ -460,6 +473,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
           tw_stime delta_t = msg->signal_arrival_time - msg->last_fired_time;
           tw_stime delta_change = stdp_delta_change_params_weak_a * powl(M_E,delta_t/stdp_delta_change_params_weak_b); //the first argument of powl is eulers number
 
+
           for(i=0; i < s->number_of_outgoing_edges; i++)
           {
             if(s->outgoing_edge_info_dst[i]==msg->signal_current_node)
@@ -468,6 +482,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
               printf("\t%s%lf","Old Edge Weight: ", s->outgoing_edge_info_weight[i]);
 #endif
               // Modify the edge weight based on whatever rule
+
               if(stdp_weight_switch)
               {
                 s->outgoing_edge_info_weight[i] = stdp_update_edge_parm(delta_change,s->outgoing_edge_info_weight[i],0); // for the weight stdp toggle
@@ -494,7 +509,15 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
 
           break;
         }
-
+      case PRINT_EDGE_WEIGHTS_SPEEDS:
+        {
+          if(s->number_of_outgoing_edges != 0){
+            for(i=0; i < s->number_of_outgoing_edges; i++){
+                tw_output(lp,"tw: Edge From Node %lu to Node %lu ; Edge Speed : %11.22lf ; Edge Weight: %11.22lf ; Current Time: %11.22lf\n", s->id, s->outgoing_edge_info_dst[i], s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i], s->current_time);
+              }
+          }
+          break;
+        }
       }
 }
 

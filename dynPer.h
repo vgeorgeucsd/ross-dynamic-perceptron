@@ -17,7 +17,8 @@ enum airport_event_t
   DEPARTING,
   DROPPING,
   STDP_STRONG, // stdp increase weight
-  STDP_WEAK    // stdp decrease weight
+  STDP_WEAK,    // stdp decrease weight
+  PRINT_EDGE_WEIGHTS_SPEEDS
 };
 
 struct airport_state
