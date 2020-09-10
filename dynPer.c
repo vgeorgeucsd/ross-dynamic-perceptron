@@ -52,9 +52,7 @@ init(airport_state * s, tw_lp * lp)
 
   unsigned long int self_id = (unsigned long int) lp->gid;
   extern struct Graph* graph;
-
   extern struct Stim* stim;
-  struct StimNode* stimPtr = stim->head[self_id];
 
   // Initial values of vertices
   tw_event *e;
@@ -75,7 +73,9 @@ init(airport_state * s, tw_lp * lp)
 
   // Getting Graph information
   s->id = graph->head[self_id]->nid;
+
   s->max_refractory_period = graph->head[self_id]->ref_per;
+
   s->firing_threshold = graph->head[self_id]->threshold;
   // s->number_of_edge_parameters = 2;
 
@@ -96,6 +96,8 @@ init(airport_state * s, tw_lp * lp)
   {
     // do nothing
     s->number_of_outgoing_edges = 0;
+    free(graph->head[self_id]);
+    graph->head[self_id] = NULL;
   }
   else
   {
@@ -104,9 +106,10 @@ init(airport_state * s, tw_lp * lp)
     s->outgoing_edge_info_speed = tw_calloc(TW_LOC,"oe_speed",sizeof(tw_stime *), s->number_of_outgoing_edges);
     s->outgoing_edge_info_weight = tw_calloc(TW_LOC,"oe_weight",sizeof(tw_stime *), s->number_of_outgoing_edges);
 
-    struct Node* ptr1 = graph->head[self_id];
-    while (ptr1 != NULL)
+    struct Node* ptr1;
+    while(graph->head[self_id] != NULL)
     {
+      ptr1 = graph->head[self_id];
       s->outgoing_edge_info_dst[numOutEdges1] = ptr1->dest;
       s->outgoing_edge_info_dist[numOutEdges1] = ptr1->dist;
       s->outgoing_edge_info_speed[numOutEdges1] = INIT_EDGE_SPEED;
@@ -123,11 +126,14 @@ init(airport_state * s, tw_lp * lp)
       printf("In Var Edge Dist : %11.30lf\n", ptr1->dist);
 
 #endif
-
-      ptr1 = ptr1->next;
+      graph->head[self_id] = graph->head[self_id]->next;
+      free(ptr1);
+      ptr1 = NULL;
       numOutEdges1++;
     }
   }
+  free(graph->head[self_id]);
+  graph->head[self_id] = NULL;
 
 // tw_event_new(destination logical process, delay , sender logical process)
 //  if(lp->gid <= 100)
@@ -138,30 +144,39 @@ init(airport_state * s, tw_lp * lp)
 //    m->edge_sig_amplitude = 1;
 //    tw_event_send(e);
 //  }
-  while (stimPtr != NULL && stimPtr->amplitude != 0)
-    {
-      e = tw_event_new(self_id, stimPtr->delay, lp);
-      m = tw_event_data(e);
-      m->type = ARRIVING;
-      m->edge_sig_amplitude = stimPtr->amplitude;
-      m->edge_weight = 1;
-      m->edge_speed = 1;
-      m->signal_origin = self_id;
-      m->signal_origin_time = 0;
-      tw_event_send(e);
+
+  // struct StimNode* stimPtr = stim->head[self_id];
+
+  struct StimNode* stimPtr;
+  while (stim->head[self_id] != NULL && stim->head[self_id]->amplitude != 0){
+    stimPtr = stim->head[self_id];
+    e = tw_event_new(self_id, stimPtr->delay, lp);
+    m = tw_event_data(e);
+    m->type = ARRIVING;
+    m->edge_sig_amplitude = stimPtr->amplitude;
+    m->edge_weight = 1;
+    m->edge_speed = 1;
+    m->signal_origin = self_id;
+    m->signal_origin_time = 0;
+    tw_event_send(e);
 #if VIVEK_DEBUG
-      printf("Stimulus event\n");
-      printf("Stimulus nid: %lu\n",self_id);
-      printf("Target nid: %lu\n", self_id);
-      printf("Stimulus Amplitude: %Lf\n",stimPtr->amplitude);
-      printf("Stimulus Delay: %Lf\n",stimPtr->delay);
+    printf("Stimulus event\n");
+    printf("Stimulus nid: %lu\n",self_id);
+    printf("Target nid: %lu\n", self_id);
+    printf("Stimulus Amplitude: %Lf\n",stimPtr->amplitude);
+    printf("Stimulus Delay: %Lf\n",stimPtr->delay);
 #endif
-      stimPtr = stimPtr->next;
-    }
+    stim->head[self_id] = stim->head[self_id]->next;
+    free(stimPtr);
+    stimPtr = NULL;
+  }
+  free(stim->head[self_id]);
+  stim->head[self_id] = NULL;
 
 #if OUTPUT_MSG_CUTOFFS
   if(self_id>=INNODES){
-    for(tw_stime dly=0.0;dly<=SIM_TIME_LIMIT;dly+=CUTOFF_TIMES){
+    tw_stime dly = 0.0;
+    for(;dly<=SIM_TIME_LIMIT;dly+=CUTOFF_TIMES){
       e = tw_event_new(self_id, dly, lp);
       m = tw_event_data(e);
       m->type = PRINT_EDGE_WEIGHTS_SPEEDS;
@@ -668,6 +683,43 @@ const tw_optdef app_opt [] =
   TWOPT_END()
 };
 
+tw_stime stdp_update_edge_parm(tw_stime delta_w, tw_stime edge_parm, int parm_option)
+{
+  tw_stime update;
+  tw_stime stdp_parm_max, stdp_parm_min;
+
+  if(parm_option==0)
+  {
+    stdp_parm_max = stdp_weight_max;
+    stdp_parm_min = stdp_weight_min;
+  }
+  else if(parm_option==1)
+  {
+    stdp_parm_max = stdp_speed_max;
+    stdp_parm_min = stdp_speed_min;
+  }
+  if(delta_w > 0)
+  {
+    update = stdp_learning_rate * delta_w * (stdp_parm_max - edge_parm);
+  }
+  else
+  {
+    update = stdp_learning_rate * delta_w * (edge_parm - stdp_parm_min);
+  }
+
+  edge_parm += update;
+
+  if(edge_parm < stdp_parm_min)
+  {
+    edge_parm = stdp_parm_min;
+  }
+  if(edge_parm > stdp_parm_max)
+  {
+    edge_parm = stdp_parm_max;
+  }
+  return edge_parm;
+}
+
 // declarations of some functions used by the simulator
 int
 main(int argc, char **argv, char **env)
@@ -682,7 +734,6 @@ main(int argc, char **argv, char **env)
   extern struct Stim* stim;
   graph = generate_graph(edge_path, vertex_path);
   stim = generate_stim(stim_path);
-
 
   tw_opt_add(app_opt);
   tw_init(&argc, &argv);
@@ -721,41 +772,4 @@ main(int argc, char **argv, char **env)
   tw_end();
 
   return 0;
-}
-
-tw_stime stdp_update_edge_parm(tw_stime delta_w, tw_stime edge_parm, int parm_option)
-{
-  tw_stime update;
-  tw_stime stdp_parm_max, stdp_parm_min;
-
-  if(parm_option==0)
-  {
-    stdp_parm_max = stdp_weight_max;
-    stdp_parm_min = stdp_weight_min;
-  }
-  else if(parm_option==1)
-  {
-    stdp_parm_max = stdp_speed_max;
-    stdp_parm_min = stdp_speed_min;
-  }
-  if(delta_w > 0)
-  {
-    update = stdp_learning_rate * delta_w * (stdp_parm_max - edge_parm);
-  }
-  else
-  {
-    update = stdp_learning_rate * delta_w * (edge_parm - stdp_parm_min);
-  }
-
-  edge_parm += update;
-
-  if(edge_parm < stdp_parm_min)
-  {
-    edge_parm = stdp_parm_min;
-  }
-  if(edge_parm > stdp_parm_max)
-  {
-    edge_parm = stdp_parm_max;
-  }
-  return edge_parm;
 }

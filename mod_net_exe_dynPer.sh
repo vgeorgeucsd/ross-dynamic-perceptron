@@ -1,5 +1,5 @@
 #~/bin/bash
-NUMHIDNODES=10
+NUMHIDNODES=20
 
 # instert current directory here
 MODELDIR=/home/vivek/research/dynamic_perceptron/working_ross/fresh_pull/ross-dynamic-perceptron
