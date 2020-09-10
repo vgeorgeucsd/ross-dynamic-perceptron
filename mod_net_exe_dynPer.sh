@@ -58,7 +58,8 @@ cd ${ROSSBUILDDIR}
 cmake ../ -DROSS_BUILD_MODELS=ON
 make
 cd ${ROSSMODELDIR}
-./dynPer --extramem=1000000 --synch=1 --clock-rate=2100000000
+valgrind --leak-check=yes -s ./dynPer --extramem=1000000 --synch=1 --clock-rate=2100000000
+#./dynPer --extramem=1000000 --synch=1 --clock-rate=2100000000
 # mpirun -np 1 ./dynPer --synch=4 --nkp=1
 #mpirun -np 3 ./dynPer --synch=3 --extramem=10000
 #./dynPer --synch=1
