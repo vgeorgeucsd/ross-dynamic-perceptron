@@ -3,12 +3,10 @@ NUMHIDNODES=20
 
 # instert current directory here
 MODELDIR=/home/vivek/research/dynamic_perceptron/working_ross/fresh_pull/ross-dynamic-perceptron
-
 ROSSMODELDIR=/home/vivek/research/dynamic_perceptron/working_ross/ROSS/build/models/ross-dynamic-perceptron
 MSFTDIR=/home/vivek/research/dynamic_perceptron/ucsd_ceni/ucsd_ceni_msft/scripts
 ROSSBUILDDIR=/home/vivek/research/dynamic_perceptron/working_ross/ROSS/build
 OUTPUTDIR=/home/vivek/research/dynamic_perceptron/working_ross/fresh_pull/ross-dynamic-perceptron/temp_outputs
-
 # ROSSMODELDIR=/g/g20/george39/ROSS/build/models/ross-dynamic-perceptron
 # MODELDIR=/p/lustre1/george39/ross-dynamic-perceptron
 # MSFTDIR=/g/g20/george39/ucsd_ceni_msft/scripts
@@ -17,6 +15,12 @@ OUTPUTDIR=/home/vivek/research/dynamic_perceptron/working_ross/fresh_pull/ross-d
 # OUTPUTDIR=/p/lustre1/george39/simulations/ROSS/z_sample_outputs_${NUMHIDNODES}
 
 TOTALNODES=$((${NUMHIDNODES} + 784 + 4))
+
+OS_STIM_PATH=${MODELDIR}/stim_input.74.5
+OS_EDGE_PATH=${MODELDIR}/edge_info_source_${TOTALNODES}.out
+OS_VERTEX_PATH=${MODELDIR}/vertex_info_source_${TOTALNODES}.out
+OS_OUTPUT_PATH=${MODELDIR}/temp_outputs/
+
 
 # for debug
 #TOTALNODES=3
@@ -36,11 +40,15 @@ cd ${MODELDIR}
 mv vertex_info_source_${NUMHIDNODES}.out vertex_info_source_${TOTALNODES}.out
 mv edge_info_source_${NUMHIDNODES}.out edge_info_source_${TOTALNODES}.out
 sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g" network_parameters.h > network_parameters_${TOTALNODES}.h
-sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g" dynPer.c > dynPer_${TOTALNODES}.c
-sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g" dynPer.h > dynPer_${TOTALNODES}.h
-sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g" generate_graph.h > generate_graph_${TOTALNODES}.h
-sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g" generate_stimulus.h > generate_stimulus_${TOTALNODES}.h
-sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g" CMakeLists.txt.var > CMakeLists.txt
+sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g"    dynPer.c > dynPer_${TOTALNODES}.c
+sed "s|TOS_STIM_PATH|$OS_STIM_PATH|g"       dynPer_${TOTALNODES}.c > temp
+sed "s|TOS_EDGE_PATH|$OS_EDGE_PATH|g"       temp > dynPer_${TOTALNODES}.c
+sed "s|TOS_VERTEX_PATH|$OS_VERTEX_PATH|g"   dynPer_${TOTALNODES}.c > temp
+sed "s|TOS_OUTPUT_PATH|$OS_OUTPUT_PATH|g"   temp > dynPer_${TOTALNODES}.c
+sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g"    dynPer.h > dynPer_${TOTALNODES}.h
+sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g"    generate_graph.h > generate_graph_${TOTALNODES}.h
+sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g"    generate_stimulus.h > generate_stimulus_${TOTALNODES}.h
+sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g"    CMakeLists.txt.var > CMakeLists.txt
 
 cd ${OUTPUTDIR}
 touch sample
@@ -57,6 +65,7 @@ cd ${ROSSMODELDIR}
 #srun -n 12 ./dynPer --synch=3 --extramem=1000000 --clock-rate=2100000000
 
 cd ${MODELDIR}
+rm temp
 rm vertex_info_source_${TOTALNODES}.out
 rm edge_info_source_${TOTALNODES}.out
 rm dynPer_${TOTALNODES}.h
