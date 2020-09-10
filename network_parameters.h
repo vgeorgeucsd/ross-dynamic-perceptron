@@ -6,7 +6,7 @@
 #define EdgeParms 4
 #define VertexParms 3
 #define StimParms 3
-#define SIM_TIME_LIMIT 0.5
+#define SIM_TIME_LIMIT 2.0
 #define maxActivatorsList 100000
 #define maxActivatorsParms 4
 // Network dynamics parameters
@@ -15,6 +15,7 @@
                                 // multiplied by the weight is the total signal contribution
                                 // to the target node upon signal arrival
 #define simple_decay 1
+#define simple_decay_exp_const 0.1 // this is the exponential decay time constant
 #define gabe_decay 0
 
 // STDP parameters

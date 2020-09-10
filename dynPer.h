@@ -24,6 +24,7 @@ enum airport_event_t
 struct airport_state
 {
   unsigned long int        id; // node id
+  unsigned long int activation_counter; // used to keep track of the number of node activations
   tw_stime          firing_threshold; // this is the threshold for node activations
   tw_stime          current_amplitude; // this is the current amplitude of the node
   tw_stime          max_refractory_period; // length of the refractory periods

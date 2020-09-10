@@ -77,6 +77,8 @@ init(airport_state * s, tw_lp * lp)
   s->max_refractory_period = graph->head[self_id]->ref_per;
 
   s->firing_threshold = graph->head[self_id]->threshold;
+
+  s->activation_counter = 0;
   // s->number_of_edge_parameters = 2;
 
   struct Node* ptr = graph->head[self_id];
@@ -261,7 +263,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
             s->remaining_refractory_period = 0;
             msg->previous_evaluation_time = s->last_evaluation_time;
             ts = msg->previous_evaluation_time - s->current_time;
-            decay_value = exp(0.1*ts);
+            decay_value = exp(simple_decay_exp_const*ts);
             msg->prev_current_amplitude = s->current_amplitude;
             s->current_amplitude = msg->edge_sig_amplitude * msg->edge_weight + s->current_amplitude * decay_value; //applying simple decay
 #endif
@@ -270,6 +272,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
 
             if(s->current_amplitude >= s->firing_threshold)
             {
+              (s->activation_counter)++;
               // Printing out the activators inforamtion
               // End setting p the File printing information
               for (i=0; i<s->num_activators ; i++)
@@ -526,6 +529,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
         }
       case PRINT_EDGE_WEIGHTS_SPEEDS:
         {
+          tw_output(lp,"tw: Number of activations of Node %lu: %ld\n", s->id, s->activation_counter);
           if(s->number_of_outgoing_edges != 0){
             for(i=0; i < s->number_of_outgoing_edges; i++){
                 tw_output(lp,"tw: Edge From Node %lu to Node %lu ; Edge Speed : %11.22lf ; Edge Weight: %11.22lf ; Current Time: %11.22lf\n", s->id, s->outgoing_edge_info_dst[i], s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i], s->current_time);
