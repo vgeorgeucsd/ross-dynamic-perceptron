@@ -7,7 +7,7 @@
 #define VertexParms 3
 #define StimParms 3
 #define SIM_TIME_LIMIT 2.0
-#define maxActivatorsList 100000
+#define maxActivatorsList 500
 #define maxActivatorsParms 4
 // Network dynamics parameters
 #define INIT_EDGE_SPEED 0.5 // This is the initial speed for all edges in the network

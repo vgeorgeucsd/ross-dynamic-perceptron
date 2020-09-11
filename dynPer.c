@@ -534,7 +534,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
         }
       case PRINT_EDGE_WEIGHTS_SPEEDS:
         {
-          tw_output(lp,"tw: Number of activations of Node %lu: %ld\n", s->id, s->activation_counter);
+          tw_output(lp,"xtw: Number of activations of Node %lu: %ld\n", s->id, s->activation_counter);
           if(s->number_of_outgoing_edges != 0){
             for(i=0; i < s->number_of_outgoing_edges; i++){
                 tw_output(lp,"tw: Edge From Node %lu to Node %lu ; Edge Speed : %11.22lf ; Edge Weight: %11.22lf ; Current Time: %11.22lf\n", s->id, s->outgoing_edge_info_dst[i], s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i], s->current_time);

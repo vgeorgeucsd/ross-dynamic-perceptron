@@ -1,5 +1,5 @@
 #~/bin/bash
-NUMHIDNODES=20
+NUMHIDNODES=200
 
 # instert current directory here
 MODELDIR=/home/vivek/research/dynamic_perceptron/working_ross/fresh_pull/ross-dynamic-perceptron
@@ -33,7 +33,7 @@ sed "s/NUMBEROFHIDDENNODES/$NUMHIDNODES/g" create_ross_inputs.py > create_ross_i
 python create_ross_inputs_${NUMHIDNODES}.py
 mv vertex_info_source_${NUMHIDNODES}.out ${MODELDIR}
 mv edge_info_source_${NUMHIDNODES}.out ${MODELDIR}
-# rm create_ross_inputs_${NUMHIDNODES}.py
+rm create_ross_inputs_${NUMHIDNODES}.py
 
 cd ${MODELDIR}
 
@@ -58,8 +58,8 @@ cd ${ROSSBUILDDIR}
 cmake ../ -DROSS_BUILD_MODELS=ON
 make
 cd ${ROSSMODELDIR}
-valgrind --leak-check=yes -s ./dynPer --extramem=1000000 --synch=1 --clock-rate=2100000000
-#./dynPer --extramem=1000000 --synch=1 --clock-rate=2100000000
+# valgrind --leak-check=yes ./dynPer --extramem=1000000 --synch=1 --clock-rate=2100000000
+./dynPer --extramem=1000000 --synch=1 --clock-rate=2100000000
 # mpirun -np 1 ./dynPer --synch=4 --nkp=1
 #mpirun -np 3 ./dynPer --synch=3 --extramem=10000
 #./dynPer --synch=1
