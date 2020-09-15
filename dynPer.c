@@ -26,10 +26,10 @@
 // char vertex_path[] = "/home/vivek/research/dynamic_perceptron/working_ross/fresh_pull/ross-dynamic-perceptron/vertex_info_source_TOTALNUMBEROFNODES.out";
 // char output_dir[]  = "/home/vivek/research/dynamic_perceptron/working_ross/fresh_pull/ross-dynamic-perceptron/temp_outputs/";
 
-char stim_path[] = "TOS_STIM_PATH";
-char edge_path[]   = "TOS_EDGE_PATH";
-char vertex_path[] = "TOS_VERTEX_PATH";
-char output_dir[]  = "TOS_OUTPUT_PATH";
+// char stim_path[] = "TOS_STIM_PATH";
+// char edge_path[]   = "TOS_EDGE_PATH";
+// char vertex_path[] = "TOS_VERTEX_PATH";
+// char output_dir[]  = "TOS_OUTPUT_PATH";
 
 
 // char stim_path[] = "/g/g20/george39/ross-dynamic-perceptron/stim_input.74.5";
@@ -737,8 +737,15 @@ main(int argc, char **argv, char **env)
 
 // This is to generate the structural graph of the network
 
-  extern char edge_path[];
-  extern char vertex_path[];
+  char edge_path[200];
+  strcpy(edge_path,argv[EXTPARMS+1]);
+
+  char vertex_path[200];
+  strcpy(vertex_path,argv[EXTPARMS+2]);
+
+  char stim_path[200];
+  strcpy(stim_path,argv[EXTPARMS+3]);
+
   extern struct Graph* graph;
   extern struct Stim* stim;
   graph = generate_graph(edge_path, vertex_path);

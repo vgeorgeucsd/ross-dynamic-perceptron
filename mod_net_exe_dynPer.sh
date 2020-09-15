@@ -1,6 +1,7 @@
 #~/bin/bash
-NUMHIDNODES=200
+NUMHIDNODES=100
 
+EXTPARMSNUM=3
 # instert current directory here
 MODELDIR=/home/vivek/research/dynamic_perceptron/working_ross/fresh_pull/ross-dynamic-perceptron
 ROSSMODELDIR=/home/vivek/research/dynamic_perceptron/working_ross/ROSS/build/models/ross-dynamic-perceptron
@@ -37,14 +38,11 @@ rm create_ross_inputs_${NUMHIDNODES}.py
 
 cd ${MODELDIR}
 
-mv vertex_info_source_${NUMHIDNODES}.out vertex_info_source_${TOTALNODES}.out
-mv edge_info_source_${NUMHIDNODES}.out edge_info_source_${TOTALNODES}.out
+mv vertex_info_source_${NUMHIDNODES}.out $OS_VERTEX_PATH
+mv edge_info_source_${NUMHIDNODES}.out $OS_EDGE_PATH
 sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g" network_parameters.h > network_parameters_${TOTALNODES}.h
 sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g"    dynPer.c > dynPer_${TOTALNODES}.c
-sed "s|TOS_STIM_PATH|$OS_STIM_PATH|g"       dynPer_${TOTALNODES}.c > temp
-sed "s|TOS_EDGE_PATH|$OS_EDGE_PATH|g"       temp > dynPer_${TOTALNODES}.c
-sed "s|TOS_VERTEX_PATH|$OS_VERTEX_PATH|g"   dynPer_${TOTALNODES}.c > temp
-sed "s|TOS_OUTPUT_PATH|$OS_OUTPUT_PATH|g"   temp > dynPer_${TOTALNODES}.c
+sed -i "s|EXTPARMS|$EXTPARMSNUM|g"   dynPer_${TOTALNODES}.c
 sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g"    dynPer.h > dynPer_${TOTALNODES}.h
 sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g"    generate_graph.h > generate_graph_${TOTALNODES}.h
 sed "s/TOTALNUMBEROFNODES/$TOTALNODES/g"    generate_stimulus.h > generate_stimulus_${TOTALNODES}.h
@@ -59,14 +57,16 @@ cmake ../ -DROSS_BUILD_MODELS=ON
 make
 cd ${ROSSMODELDIR}
 # valgrind --leak-check=yes ./dynPer --extramem=1000000 --synch=1 --clock-rate=2100000000
-./dynPer --extramem=1000000 --synch=1 --clock-rate=2100000000
+# ./dynPer --extramem=1000000 --synch=1 --clock-rate=1300000000
+
+./dynPer --extramem=1000000 --synch=1 --clock-rate=1300000000 $OS_EDGE_PATH $OS_VERTEX_PATH $OS_STIM_PATH
 # mpirun -np 1 ./dynPer --synch=4 --nkp=1
 #mpirun -np 3 ./dynPer --synch=3 --extramem=10000
 #./dynPer --synch=1
 #srun -n 12 ./dynPer --synch=3 --extramem=1000000 --clock-rate=2100000000
 
 cd ${MODELDIR}
-rm temp
+# rm temp
 rm vertex_info_source_${TOTALNODES}.out
 rm edge_info_source_${TOTALNODES}.out
 rm dynPer_${TOTALNODES}.h
