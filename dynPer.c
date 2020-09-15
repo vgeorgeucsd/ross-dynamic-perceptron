@@ -745,6 +745,7 @@ main(int argc, char **argv, char **env)
 
   char stim_path[200];
   strcpy(stim_path,argv[EXTPARMS+3]);
+  argc = EXTPARMS+1;
 
   extern struct Graph* graph;
   extern struct Stim* stim;
