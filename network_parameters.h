@@ -6,7 +6,7 @@
 #define EdgeParms 4
 #define VertexParms 3
 #define StimParms 3
-#define SIM_TIME_LIMIT 2.0
+#define SIM_TIME_LIMIT 2.1
 #define maxActivatorsList 500
 #define maxActivatorsParms 4
 // Network dynamics parameters
@@ -20,7 +20,7 @@
 
 // STDP parameters
 #define stdp_weight_switch 1  // turn on and off weight stdp
-#define stdp_speed_switch 1  // turn on and off weight stdp
+#define stdp_speed_switch 0  // turn on and off weight stdp
 #define stdp_learning_rate 0.05
 #define stdp_delta_change_params_weak_a -0.6
 #define stdp_delta_change_params_weak_b 8.0
