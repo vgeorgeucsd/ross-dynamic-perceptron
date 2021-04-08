@@ -7,7 +7,7 @@
 #define VertexParms 3
 #define StimParms 3
 #define SIM_TIME_LIMIT 2.1
-#define maxActivatorsList 500
+#define maxActivatorsList 500000
 #define maxActivatorsParms 4
 // Network dynamics parameters
 #define INIT_EDGE_SPEED 0.5 // This is the initial speed for all edges in the network
@@ -15,21 +15,23 @@
                                 // multiplied by the weight is the total signal contribution
                                 // to the target node upon signal arrival
 #define simple_decay 1
-#define simple_decay_exp_const 0.1 // this is the exponential decay time constant
+#define simple_decay_exp_const 0.0093 // this is the exponential decay time constant
 #define gabe_decay 0
+#define factor 1
 
 // STDP parameters
 #define stdp_weight_switch 1  // turn on and off weight stdp
 #define stdp_speed_switch 0  // turn on and off weight stdp
 #define stdp_learning_rate 0.05
-#define stdp_delta_change_params_weak_a -0.6
-#define stdp_delta_change_params_weak_b 8.0
-#define stdp_delta_change_params_str_a 0.3
-#define stdp_delta_change_params_str_b 5.0
+#define stdp_delta_change_params_weak_a -0.00014 
+//pow(10,tw_rand_unif(lp->rng))/-1000
+#define stdp_delta_change_params_weak_b 10.0
+#define stdp_delta_change_params_str_a 0.00008
+#define stdp_delta_change_params_str_b 7.0
 #define stdp_weight_min -2.0
 #define stdp_weight_max 2.0
 #define stdp_speed_min 0.0
-#define stdp_speed_max 2.0
+#define stdp_speed_max 200.0
 
 // Outputs
 #define VIVEK_DEBUG 0

@@ -5,6 +5,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
+#include <stdlib.h>
 /*
   dynPer.c
   Dynamic Perceptron simulator
@@ -55,6 +57,9 @@ void
 init(airport_state * s, tw_lp * lp)
 {
 
+  srand(time(NULL)); //Initialization only called once
+  int32_t local_seed[] = { rand(),rand(),rand(),rand() };
+  g_tw_rng_seed = local_seed;
   unsigned long int self_id = (unsigned long int) lp->gid;
   extern struct Graph* graph;
   extern struct Stim* stim;
@@ -118,9 +123,29 @@ init(airport_state * s, tw_lp * lp)
     {
       ptr1 = graph->head[self_id];
       s->outgoing_edge_info_dst[numOutEdges1] = ptr1->dest;
+//CHANGE BELOW FOR DELAY PERTURBATION
       s->outgoing_edge_info_dist[numOutEdges1] = ptr1->dist;
+// + ((2*tw_rand_unif(lp->rng) - 1)/factor);
+//      double Mu = 0.05;
+//      double Sd = 0.015;
+//      s->outgoing_edge_info_dist[numOutEdges1] = tw_rand_normal_sd(lp->rng,Mu,Sd);
+//      while(s->outgoing_edge_info_dist[numOutEdges1] < 0)
+//      {
+//        s->outgoing_edge_info_dist[numOutEdges1] = tw_rand_normal_sd(lp->rng,Mu,Sd);
+//        s->outgoing_edge_info_dist[numOutEdges1] = ptr1->dist + ((2*tw_rand_unif(lp->rng) - 1)/factor);
+//      }
       s->outgoing_edge_info_speed[numOutEdges1] = INIT_EDGE_SPEED;
       s->outgoing_edge_info_weight[numOutEdges1] = ptr1->weight;
+// + ((2*tw_rand_unif(lp->rng) - 1)/factor);
+//      s->outgoing_edge_info_weight[numOutEdges1] = tw_rand_unif(lp->rng)-0.3;
+//      if(s->outgoing_edge_info_weight[numOutEdges1]<0)
+//      {
+//         s->outgoing_edge_info_weight[numOutEdges1] = s->outgoing_edge_info_weight[numOutEdges1]*2/0.3;
+//      }
+//      else
+//      {
+//         s->outgoing_edge_info_weight[numOutEdges1] = s->outgoing_edge_info_weight[numOutEdges1]*2/0.7;
+//      }
       // s->outgoing_edge_info_amplitude[numOutEdges1] = 0; // initial edge signal amplitude
 
 #if OUTPUT_EDGE_WEIGHTS_TO_STDOUT
