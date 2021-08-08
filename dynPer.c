@@ -4,6 +4,7 @@
 #include "network_parameters_TOTALNUMBEROFNODES.h"
 #include <math.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
@@ -60,6 +61,7 @@ init(airport_state * s, tw_lp * lp)
   srand(time(NULL)); //Initialization only called once
   int32_t local_seed[] = { rand(),rand(),rand(),rand() };
   g_tw_rng_seed = local_seed;
+  rng_set_seed(lp->rng, g_tw_rng_seed);
   unsigned long int self_id = (unsigned long int) lp->gid;
   extern struct Graph* graph;
   extern struct Stim* stim;
@@ -126,30 +128,33 @@ init(airport_state * s, tw_lp * lp)
 //CHANGE BELOW FOR DELAY PERTURBATION
       s->outgoing_edge_info_dist[numOutEdges1] = ptr1->dist;
 // + ((2*tw_rand_unif(lp->rng) - 1)/factor);
-//      double Mu = 0.05;
-//      double Sd = 0.015;
-//      s->outgoing_edge_info_dist[numOutEdges1] = tw_rand_normal_sd(lp->rng,Mu,Sd);
+      double Mu = 0.05;
+      double Sd = 0.015;
+      unsigned int rng_calls = 0;
+//      s->outgoing_edge_info_dist[numOutEdges1] = tw_rand_normal_sd(lp->rng, Mu, Sd, &rng_calls);
 //      while(s->outgoing_edge_info_dist[numOutEdges1] < 0)
 //      {
-//        s->outgoing_edge_info_dist[numOutEdges1] = tw_rand_normal_sd(lp->rng,Mu,Sd);
+//        s->outgoing_edge_info_dist[numOutEdges1] = tw_rand_normal_sd(lp->rng, Mu, Sd, &rng_calls);
 //        s->outgoing_edge_info_dist[numOutEdges1] = ptr1->dist + ((2*tw_rand_unif(lp->rng) - 1)/factor);
 //      }
       s->outgoing_edge_info_speed[numOutEdges1] = INIT_EDGE_SPEED;
-      s->outgoing_edge_info_weight[numOutEdges1] = ptr1->weight;
-// + ((2*tw_rand_unif(lp->rng) - 1)/factor);
-//      s->outgoing_edge_info_weight[numOutEdges1] = tw_rand_unif(lp->rng)-0.3;
+      s->outgoing_edge_info_weight[numOutEdges1] = ptr1->weight + ((2*tw_rand_unif(lp->rng) - 1)/factor);
+//      s->outgoing_edge_info_weight[numOutEdges1] = tw_rand_unif(lp->rng) - 0.2;
+//      s->outgoing_edge_info_weight[numOutEdges1] = ((double)rand()/(double)RAND_MAX) - 0.2;
 //      if(s->outgoing_edge_info_weight[numOutEdges1]<0)
 //      {
-//         s->outgoing_edge_info_weight[numOutEdges1] = s->outgoing_edge_info_weight[numOutEdges1]*2/0.3;
+//         s->outgoing_edge_info_weight[numOutEdges1] = s->outgoing_edge_info_weight[numOutEdges1]*2/0.2;
 //      }
 //      else
 //      {
-//         s->outgoing_edge_info_weight[numOutEdges1] = s->outgoing_edge_info_weight[numOutEdges1]*2/0.7;
+//         s->outgoing_edge_info_weight[numOutEdges1] = s->outgoing_edge_info_weight[numOutEdges1]*2/0.8;
 //      }
       // s->outgoing_edge_info_amplitude[numOutEdges1] = 0; // initial edge signal amplitude
 
 #if OUTPUT_EDGE_WEIGHTS_TO_STDOUT
       tw_output(lp,"tw: Edge from Node %lu to Node %lu ; Edge Speed : %11.17lf ; Edge Weight: %11.17lf ; Modified at Current Time: 0.0 \n", self_id, s->outgoing_edge_info_dst[numOutEdges1], s->outgoing_edge_info_speed[numOutEdges1], s->outgoing_edge_info_weight[numOutEdges1]);
+//      tw_output(lp,"tw: %lu %lu %11.17lf\n", self_id, s->outgoing_edge_info_dst[numOutEdges1], s->outgoing_edge_info_weight[numOutEdges1]);
+
 #endif
 #if VIVEK_DEBUG
       printf("Source nid: %lu\n",self_id);
@@ -255,6 +260,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
             s->activators_info[s->num_activators][1] = msg->signal_origin_time;
             s->activators_info[s->num_activators][2] = msg->edge_sig_amplitude;
             s->activators_info[s->num_activators][3] = s->current_time;
+            s->activators_info[s->num_activators][4] = msg->edge_weight;
             s->num_activators++;
             //end keepig track of activators list
 #if gabe_decay
@@ -309,7 +315,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
               {
 
 #if OUTPUT_ACT_LST_TO_STDOUT
-                tw_output(lp,"tw: Activation Target Node: %lu, Target Node Act Time: %11.21lf, Source Node: %lf, Source Activation Time: %11.21lf, Source Signal Amplitude: %11.21lf, Source Signal Arrival Time: %11.21lf\n", s->id, s->last_evaluation_time, s->activators_info[i][0],s->activators_info[i][1],s->activators_info[i][2], s->activators_info[i][3]);
+                tw_output(lp,"tw: Activation Target Node: %lu, Target Node Act Time: %11.21lf, Source Node: %lf, Source Activation Time: %11.21lf, Source Signal Amplitude: %11.21lf, Source Signal Arrival Time: %11.21lf, Edge Weight: %11.21lf\n", s->id, s->last_evaluation_time, s->activators_info[i][0],s->activators_info[i][1],s->activators_info[i][2], s->activators_info[i][3],s->activators_info[i][4]);
 #endif
 
                 // Sending STDP signals for strengthening edge weight
@@ -563,6 +569,7 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
           if(s->number_of_outgoing_edges != 0){
             for(i=0; i < s->number_of_outgoing_edges; i++){
                 tw_output(lp,"tw: Edge From Node %lu to Node %lu ; Edge Speed : %11.22lf ; Edge Weight: %11.22lf ; Current Time: %11.22lf\n", s->id, s->outgoing_edge_info_dst[i], s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i], s->current_time);
+//                tw_output(lp,"tw: %lu %lu %11.22lf %11.22lf\n", s->id, s->outgoing_edge_info_dst[i], s->outgoing_edge_info_weight[i], s->current_time);
               }
           }
           break;
