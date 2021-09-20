@@ -41,6 +41,9 @@ struct airport_state
   tw_stime        *outgoing_edge_info_speed;
   tw_stime        *outgoing_edge_info_weight;
   int             num_activators;
+#if KLEBERGSTDP
+  tw_stime        arrival_weight_history[TOTALNUMBEROFNODES];
+#endif
   tw_stime        activators_info[maxActivatorsList][maxActivatorsParms];  // this is the list of activators when the node fires
                                           // the number of rows is dependent on network parameters
                                           // each row represents the information for an incoming signal
