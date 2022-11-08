@@ -17,13 +17,18 @@
 #define simple_decay 1
 #define simple_decay_exp_const 0.0093 // this is the exponential decay time constant
 #define gabe_decay 0
-#define factor 1
+#define factor 10
 
 // STDP parameters
 #define stdp_weight_switch 1  // turn on and off weight stdp
 #define stdp_speed_switch 0  // turn on and off weight stdp
-#define OLDHEBBIAN 1 // turn on (1) or off (0) the original hebbian stdp scheme
-#define KLEBERGSTDP 0 // turn on or off Kleberg (Vogels) paper STDP
+#define OLDHEBBIAN 0 // turn on (1) or off (0) the original hebbian stdp scheme
+#define KLEBERGSTDP 1 // turn on or off Kleberg (Vogels) paper STDP
+#define STRONG_OFF 0 // turn off STDP facilitation only
+#define WEAK_OFF 0 // turn off STDP depression only
+#define STRONG_MAX 0 // turn STDP facilitation to maximum always
+#define WEAK_MAX 0 // turn STDP depression to maximum always
+
 
 #define stdp_learning_rate 0.05
 #define stdp_delta_change_params_weak_a -0.00014
