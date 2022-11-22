@@ -89,6 +89,7 @@
 #define OUTPUT_FILENAME_LENGTH 200
 #define STRING_SIZE_OF_NODE_IDS 10
 #define OUTPUT_EDGE_WEIGHTS_TO_STDOUT 0
+#define OUTPUT_EDGE_GRADIENTS_TO_STDOUT 1
 #define OUTPUT_ACT_LST_TO_STDOUT 0
 #define CUTOFF_TIMES 0.1 // this and the next variable need to be checked to be on the same scale
 #define OUTPUT_MSG_CUTOFFS 1

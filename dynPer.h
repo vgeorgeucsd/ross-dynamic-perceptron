@@ -40,6 +40,7 @@ struct airport_state
   tw_stime        *outgoing_edge_info_dist;
   tw_stime        *outgoing_edge_info_speed;
   tw_stime        *outgoing_edge_info_weight;
+  tw_stime        *outgoing_edge_info_weight_original;
   int             num_activators;
 #if KLEBERGSTDP
   tw_stime        arrival_weight_history[TOTALNUMBEROFNODES];

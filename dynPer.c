@@ -119,6 +119,7 @@ init(airport_state * s, tw_lp * lp)
     s->outgoing_edge_info_dist = tw_calloc(TW_LOC,"oe_dist",sizeof(tw_stime *), s->number_of_outgoing_edges);
     s->outgoing_edge_info_speed = tw_calloc(TW_LOC,"oe_speed",sizeof(tw_stime *), s->number_of_outgoing_edges);
     s->outgoing_edge_info_weight = tw_calloc(TW_LOC,"oe_weight",sizeof(tw_stime *), s->number_of_outgoing_edges);
+    s->outgoing_edge_info_weight_original = tw_calloc(TW_LOC,"oe_weight",sizeof(tw_stime *), s->number_of_outgoing_edges);
 
     struct Node* ptr1;
     while(graph->head[self_id] != NULL)
@@ -145,19 +146,20 @@ init(airport_state * s, tw_lp * lp)
       //s->outgoing_edge_info_weight[numOutEdges1] = ptr1->weight + ((2*tw_rand_unif(lp->rng) - 1)/factor);
 
 
-      s->outgoing_edge_info_weight[numOutEdges1] = ptr1->weight;
+//      s->outgoing_edge_info_weight[numOutEdges1] = ptr1->weight;
 
 
-//      s->outgoing_edge_info_weight[numOutEdges1] = tw_rand_unif(lp->rng) - 0.2;
+      s->outgoing_edge_info_weight[numOutEdges1] = tw_rand_unif(lp->rng) - 0.2;
 //      s->outgoing_edge_info_weight[numOutEdges1] = ((double)rand()/(double)RAND_MAX) - 0.2;
-//      if(s->outgoing_edge_info_weight[numOutEdges1]<0)
-//      {
-//         s->outgoing_edge_info_weight[numOutEdges1] = s->outgoing_edge_info_weight[numOutEdges1]*2/0.2;
-//      }
-//      else
-//      {
-//         s->outgoing_edge_info_weight[numOutEdges1] = s->outgoing_edge_info_weight[numOutEdges1]*2/0.8;
-//      }
+      if(s->outgoing_edge_info_weight[numOutEdges1]<0)
+      {
+         s->outgoing_edge_info_weight[numOutEdges1] = s->outgoing_edge_info_weight[numOutEdges1]*2/0.2;
+      }
+      else
+      {
+         s->outgoing_edge_info_weight[numOutEdges1] = s->outgoing_edge_info_weight[numOutEdges1]*2/0.8;
+      }
+      s->outgoing_edge_info_weight_original[numOutEdges1] = s->outgoing_edge_info_weight[numOutEdges1];
       // s->outgoing_edge_info_amplitude[numOutEdges1] = 0; // initial edge signal amplitude
 
 #if OUTPUT_EDGE_WEIGHTS_TO_STDOUT
@@ -165,6 +167,15 @@ init(airport_state * s, tw_lp * lp)
 //      tw_output(lp,"tw: %lu %lu %11.17lf\n", self_id, s->outgoing_edge_info_dst[numOutEdges1], s->outgoing_edge_info_weight[numOutEdges1]);
 
 #endif
+
+//#if OUTPUT_EDGE_GRADIENTS_TO_STDOUT
+//      tw_output(lp,"twx: Edge from Node %lu to Node %lu ; Edge Speed : %11.17lf ; Edge Weight: %11.17lf ; Modified at Current Time: 0.0 \n", self_id, s->outgoing_edge_info_dst[numOutEdges1], s->outgoing_edge_info_speed[numOutEdges1], s->outgoing_edge_info_weight[numOutEdges1] - s->outgoing_edge_info_weight_original[numOutEdges1]);
+//      tw_output(lp,"tw: %lu %lu %11.17lf\n", self_id, s->outgoing_edge_info_dst[numOutEdges1], s->outgoing_edge_info_weight[numOutEdges1]);
+//#endif
+
+//
+//      #endif
+
 #if VIVEK_DEBUG
       printf("Source nid: %lu\n",self_id);
       printf("Sim Var Target nid: %lu\n", s->outgoing_edge_info_dst[numOutEdges1]);
@@ -772,8 +783,14 @@ event_handler(airport_state * s, tw_bf * bf, airport_message * msg, tw_lp * lp)
           tw_output(lp,"xtw: Number of activations of Node %lu: %ld ; Current Time: %11.22lf\n", s->id, s->activation_counter, s->current_time);
           if(s->number_of_outgoing_edges != 0){
             for(i=0; i < s->number_of_outgoing_edges; i++){
+#if OUTPUT_EDGE_WEIGHTS_TO_STDOUT
                 tw_output(lp,"tw: Edge From Node %lu to Node %lu ; Edge Speed : %11.22lf ; Edge Weight: %11.22lf ; Current Time: %11.22lf\n", s->id, s->outgoing_edge_info_dst[i], s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i], s->current_time);
 //                tw_output(lp,"tw: %lu %lu %11.22lf %11.22lf\n", s->id, s->outgoing_edge_info_dst[i], s->outgoing_edge_info_weight[i], s->current_time);
+#endif
+
+#if OUTPUT_EDGE_GRADIENTS_TO_STDOUT
+                tw_output(lp,"twx: Edge From Node %lu to Node %lu ; Edge Speed : %11.22lf ; Edge Weight: %11.22lf ; Current Time: %11.22lf\n", s->id, s->outgoing_edge_info_dst[i], s->outgoing_edge_info_speed[i], s->outgoing_edge_info_weight[i]-s->outgoing_edge_info_weight_original[i], s->current_time);
+#endif
               }
           }
           break;
