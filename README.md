@@ -6,7 +6,6 @@ This model can be built by ROSS by sym-linking it into the ROSS/models directory
 
 ``` shell
 git clone https://github.com/ROSS-org/ROSS
-git clone https://github.com/ROSS-org/template-model
 cd ROSS/models
 ln -s ../../ross-dynamic-perceptron ./
 cd ../
